@@ -1,0 +1,12 @@
+level: 1
+end: [5000, 1000]
+platforms: {
+  {
+    position: [1850,1000]
+    dimensions: [100,100]
+  }
+  { 
+    position: [1900, 950]
+    dimensions: [100, 200]
+  }
+}

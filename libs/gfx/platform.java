@@ -1,0 +1,72 @@
+package libs.gfx;
+
+import libs.math.*;
+import libs.functionality.*;
+import java.awt.*;
+import java.util.HashMap;
+
+/* platforms:
+ - size & shape --> probably mostly rectangular 
+ - width & height
+ */
+public class platform {
+  String title;
+	public boolean infinite = false, collide = true, damageable = false;
+  double health = Integer.MAX_VALUE;
+	neo nn = new neo();
+	neo.Vec2 dimensions, pos;
+	Color pc;
+	public platform(int x, int y, int w, int h) {
+		dimensions = nn.new Vec2(w, h);
+		pos = nn.new Vec2(x, y);
+	}
+	public platform(int x, int y, int w, int h, String c) {
+		dimensions = nn.new Vec2(w, h);
+		pos = nn.new Vec2(x, y);
+		this.assign_color(c);
+	}
+	public platform(int x, int y, int w, int h, String c, String t) {
+		dimensions = nn.new Vec2(w, h);
+		pos = nn.new Vec2(x, y);
+		this.assign_color(c);
+    title = t;
+	}
+  public boolean visible(neo.Vec2 pos, int scope) {
+    int px = (int) pos.x, py = (int) pos.y;
+    return (this.pos.x > (px/scope)*scope && this.pos.x < (px/scope+1)*scope);
+  }
+
+  public void setHealth(double h) {
+    this.health = h;
+    this.damageable = true;
+  }
+  public void shoot(bullet bb) {
+    if (damageable) this.health -= bb.get_dmg();
+  }
+	public void assign_color(String cname) {
+		HashMap<String, String> colors = new HashMap<String, String>() {{
+			put("black", "000000");
+			put("white", "FFFFFF");
+			put("red", "FF0000");
+			put("green", "00FF00");
+			put("blue", "0000FF");
+			put("grey", "222222");
+			put("cyan", "00FFFF");
+		}};
+		int color = Integer.parseInt((colors.containsKey(cname.toLowerCase()) ? colors.get(cname.toLowerCase()) : colors.get("grey")), 16);
+    this.assign_color(color);
+	}
+  public neo.Vec2 get_pos() {
+    return nn.new Vec2(pos.x, pos.y);
+  }
+  public neo.Vec2 get_dimensions() {
+    return nn.new Vec2(dimensions.x, dimensions.y);
+  }
+  public void assign_color(int H) {
+    pc = new Color(H>>16&0xFF, H>>8&0xFF, H&0xFF, 255);
+  }
+	// hex codes 0xRRGGBB + 0xAA (alpha --> should be defaulted at 255)
+	public void assign_color(int R, int G, int B, int A) {
+		pc = new Color(R, G, B, A);
+	}
+};

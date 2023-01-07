@@ -14,9 +14,11 @@ public class weapon {
   String name, description;
   String bullet_fn;
   double dmg;
-  public weapon(String nn, double damage) {
-    name = nn;
-    dmg = damage;
+  neo nn;
+  public weapon(String nm, double damage, neo n) {
+    this.name = nm;
+    this.dmg = damage;
+    this.nn = n;
   }
   public void update(int TICKS) {
     for (Iterator<bullet> i=bullets.iterator(); i.hasNext();) {
@@ -57,7 +59,7 @@ public class weapon {
 
   public void shoot(neo.Vec2 p, boolean f) {
     neo nn = new neo();
-    bullet b = new bullet("sprites/bullet.bmp", dmg, 32, 32, 1, 1);
+    bullet b = new bullet("sprites/bullet.bmp", dmg, 32, 32, 1, 1, this.nn);
     b.shot = true;
     b.position = nn.new Vec2(p.x, p.y);
     b.position.x += (f?1:-1)*b.img.dimensions().x;

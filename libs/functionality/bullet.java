@@ -11,8 +11,8 @@ public class bullet {
   double dmg;
   boolean shot = false, forward = false;
   neo.Vec2 position;
-  public bullet(String fn, double d, int dx, int dy, int cx, int cy) {
-    img = new sprite(fn, dx, dy, cx, cy);
+  public bullet(String fn, double d, int dx, int dy, int cx, int cy, neo nn) {
+    img = new sprite(fn, dx, dy, cx, cy, nn);
     dmg = d;
     dmg = critical();
   }

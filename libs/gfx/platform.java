@@ -13,23 +13,26 @@ public class platform {
   String title;
 	public boolean infinite = false, collide = true, damageable = false;
   double health = Integer.MAX_VALUE;
-	neo nn = new neo();
+  neo nn;
 	neo.Vec2 dimensions, pos;
 	Color pc;
-	public platform(int x, int y, int w, int h) {
-		dimensions = nn.new Vec2(w, h);
-		pos = nn.new Vec2(x, y);
+	public platform(int x, int y, int w, int h, neo n) {
+    this.nn = n;
+		this.dimensions = this.nn.new Vec2(w, h);
+		this.pos = this.nn.new Vec2(x, y);
 	}
-	public platform(int x, int y, int w, int h, String c) {
-		dimensions = nn.new Vec2(w, h);
-		pos = nn.new Vec2(x, y);
+	public platform(int x, int y, int w, int h, String c, neo n) {
+    this.nn = n;
+		this.dimensions = nn.new Vec2(w, h);
+		this.pos = nn.new Vec2(x, y);
 		this.assign_color(c);
 	}
-	public platform(int x, int y, int w, int h, String c, String t) {
-		dimensions = nn.new Vec2(w, h);
-		pos = nn.new Vec2(x, y);
+	public platform(int x, int y, int w, int h, String c, String t, neo n) {
+    this.nn = n;
+		this.dimensions = nn.new Vec2(w, h);
+		this.pos = nn.new Vec2(x, y);
 		this.assign_color(c);
-    title = t;
+    this.title = t;
 	}
   public boolean visible(neo.Vec2 pos, int scope) {
     int px = (int) pos.x, py = (int) pos.y;

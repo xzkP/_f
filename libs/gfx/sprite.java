@@ -14,17 +14,18 @@ public class sprite {
   boolean loaded = true, forward = true;
 	BufferedImage img;
 	int width, height, counter = 0, jump_tick = 500, shot_tick=0;
-	neo nn = new neo();
+  neo nn;
   neo.Vec2 pos, relative_pos, sprite_values, source_dim;
   weapon equipped;
 
-  public sprite(String fn, double px, double py, int w_count, int h_count) { 
+  public sprite(String fn, double px, double py, int w_count, int h_count, neo n) {
 		try {
       File f = new File(fn);
-			this.pos = nn.new Vec2(px, py);
-			this.relative_pos = nn.new Vec2(px, py);
-			this.sprite_values= nn.new Vec2(w_count, h_count);
-			this.source_dim = nn.new Vec2(0, 0);
+      this.nn = n;
+			this.pos = this.nn.new Vec2(px, py);
+			this.relative_pos = this.nn.new Vec2(px, py);
+			this.sprite_values= this.nn.new Vec2(w_count, h_count);
+			this.source_dim = this.nn.new Vec2(0, 0);
 			this.img = ImageIO.read(f);
 			this.width = img.getWidth();
 			this.height = img.getHeight();
@@ -35,7 +36,7 @@ public class sprite {
 	}
 
 	public neo.Vec2 dimensions() {
-		return nn.new Vec2(this.width/this.sprite_values.x, this.height/this.sprite_values.y);
+		return this.nn.new Vec2(this.width/this.sprite_values.x, this.height/this.sprite_values.y);
 	}
 
   public BufferedImage get_img() {

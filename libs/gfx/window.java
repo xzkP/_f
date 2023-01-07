@@ -17,6 +17,8 @@ public class window {
     FRAME_PERIOD = 120, BASE_HEIGHT = 500, JUMP_HEIGHT = 100, BULLET_TICKS = 300, SHOOT_TICK = 20, JUMP_TICKS=10;
   private long last=0;
   private double fps, TICK_SCALE = FRAME_PERIOD/60.0, GRAVITY=4.0/TICK_SCALE;
+  neo nn = new neo();
+  neo.Vec2 end;
 	JFrame frame;
 	Panel p;
 	InputKey keys;
@@ -26,11 +28,11 @@ public class window {
   ArrayList<mob> mobs = new ArrayList<mob>();
 	player main;
 	public window(String w_title, int w, int h) {
-		main = new player("sprites/animated.bmp", w/2, h-BASE_HEIGHT, 4, 4);
-    main.equipped= new weapon("fists", 30);
+		main = new player("sprites/animated.bmp", w/2, h-BASE_HEIGHT, 4, 4, this.nn);
+    main.equipped = new weapon("fists", 30, this.nn);
     main.shot_tick = SHOOT_TICK*FRAME_PERIOD;
     main.inventory.add(main.equipped);
-		platform ground = new platform(0, h-BASE_HEIGHT+(int) main.dimensions().x-1, w, h, "grey");
+		platform ground = new platform(0, h-BASE_HEIGHT+(int) main.dimensions().x-1, w, h, "grey", this.nn);
 		ground.infinite = true;
 		ground.collide = false;
 		platforms.add(ground);
@@ -81,6 +83,18 @@ public class window {
         }
       }
       parse_platform(metadata.get("platforms"));
+      if (metadata.containsKey("end")) {
+        String endl = metadata.get("end").get(0).replace("{","").replace("}","").replace("[","").replace("]","").strip();
+        int px = Integer.parseInt(endl.substring(0, endl.indexOf(",")).strip()), 
+            py = Integer.parseInt(endl.substring(endl.indexOf(",")+1).strip());
+        this.end = this.nn.new Vec2(px, py);
+      } else { // ?
+        int max_x = 0;
+        for (platform p : platforms) {
+          max_x = Math.max((int) p.pos.x, max_x);
+        }
+        this.end = this.nn.new Vec2(max_x, 1e3);
+      }
     } catch (Exception e) {
       System.out.println(e);
       System.out.println(String.format("Can't read file: %s", fn));
@@ -114,11 +128,11 @@ public class window {
                p2 = pos.substring(pos.indexOf(",")+1).strip(),
                d1 = dim.substring(0, dim.indexOf(",")).strip(),
                d2 = dim.substring(dim.indexOf(",")+1).strip();
-        p_v = main.nn.new Vec2(Integer.parseInt(p1), Integer.parseInt(p2));
-        d_v = main.nn.new Vec2(Integer.parseInt(d1), Integer.parseInt(d2));
+        p_v = this.nn.new Vec2(Integer.parseInt(p1), Integer.parseInt(p2));
+        d_v = this.nn.new Vec2(Integer.parseInt(d1), Integer.parseInt(d2));
         String hex = (info.containsKey("hex")?info.get("hex"):"222222"), title=(info.containsKey("title")?info.get("title"):String.format("P%d", this.platforms.size()));
         // assuming that platform is square (TODO: add other shapes)
-        platform p = new platform((int) p_v.x, (int) p_v.y, (int) d_v.x, (int) d_v.y);
+        platform p = new platform((int) p_v.x, (int) p_v.y, (int) d_v.x, (int) d_v.y, this.nn);
         p.assign_color(Integer.parseInt(hex, 16));
         if (info.containsKey("health")) {
           p.setHealth(Double.parseDouble(info.get("health")));
@@ -146,21 +160,21 @@ public class window {
         } catch (Exception e) {}
       }
     }
-		main.relative_pos.x = main.nn.mod((int) main.relative_pos.x, width);
-		main.relative_pos.y = main.nn.mod((int) main.relative_pos.y, width);
+		main.relative_pos.x = this.nn.mod((int) main.relative_pos.x, width);
+		main.relative_pos.y = this.nn.mod((int) main.relative_pos.y, width);
 	}
 
 	public void exec() {
     int delay = 35, jf = 0;
 		while (true) {
 			frame.repaint();
-			main.move(platforms, TICK_SCALE);
+			main.move(platforms, end, TICK_SCALE);
       main.shot_tick++;
       main.jump_tick++;
       main.jumps[0]= (main.jump_tick >= delay*TICK_SCALE);
       if (main.jumps[1]) {
-        main.pos = main.pos.add(main.nn.new Vec2(0, -JUMP_HEIGHT/JUMP_TICKS));
-        main.relative_pos = main.relative_pos.add(main.nn.new Vec2(0, -JUMP_HEIGHT/JUMP_TICKS));
+        main.pos = main.pos.add(this.nn.new Vec2(0, -JUMP_HEIGHT/JUMP_TICKS));
+        main.relative_pos = main.relative_pos.add(this.nn.new Vec2(0, -JUMP_HEIGHT/JUMP_TICKS));
         jf++;
         if (jf >= JUMP_TICKS) { jf = 0; main.jumps[1] = false; };
       }
@@ -206,7 +220,7 @@ public class window {
 				p.pos.x += (p.pos.x%50==0?1:0);
 				if ((p.infinite || p.visible(main.pos, width)) && p.health > 0) {
 					g.setColor(p.pc);
-					g.fillRect(main.nn.mod((int) p.pos.x, width), main.nn.mod((int) p.pos.y, height), (int) p.dimensions.x, (int) p.dimensions.y);
+					g.fillRect(nn.mod((int) p.pos.x, width), nn.mod((int) p.pos.y, height), (int) p.dimensions.x, (int) p.dimensions.y);
 				}
 			}
 
@@ -220,9 +234,9 @@ public class window {
 
           if (x instanceof player) {
             player p = (player) x;
-            for (weapon w : p.inventory) w.render(g, p.pos, main.nn.new Vec2(width, height));
+            for (weapon w : p.inventory) w.render(g, p.pos, nn.new Vec2(width, height));
           } else {
-            x.equipped.render(g, x.pos, main.nn.new Vec2(width, height));
+            x.equipped.render(g, x.pos, nn.new Vec2(width, height));
           }
 				} else {
 					System.out.println("Unable to open sprite");
@@ -232,10 +246,13 @@ public class window {
 	};
 
 	public class InputKey implements KeyListener {
+
 		public void keyPressed(KeyEvent e) {
-			/* right, up, left, down 
+			/* left , up, right, down 
 			 	 [ 37, 38, 39, 40 ] */
-			int k_t = e.getKeyCode();
+      char key = KeyEvent.getKeyText(e.getKeyCode()).charAt(0);
+      int k_t = e.getKeyCode();
+
       if (k_t == 32 && main.shot_tick >= SHOOT_TICK*TICK_SCALE) {
         main.shot_tick = 0;
         main.shoot();

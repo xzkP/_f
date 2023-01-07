@@ -28,6 +28,8 @@ public class window {
   ArrayList<mob> mobs = new ArrayList<mob>();
 	player main;
 	public window(String w_title, int w, int h) {
+		width = w;
+		height = h;
 		main = new player("sprites/animated.bmp", w/2, h-BASE_HEIGHT, 4, 4, this.nn);
     main.equipped = new weapon("fists", 30, this.nn);
     main.shot_tick = SHOOT_TICK*FRAME_PERIOD;
@@ -37,19 +39,17 @@ public class window {
 		ground.collide = false;
 		platforms.add(ground);
 
-    this.level("./levels/1.txt");
-
 		sprites.add(main);
 		frame = new JFrame(w_title);
 		p = new Panel();
-		width = w;
-		height = h;
 		frame.setSize(width, height);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.add(p);
 		keys = new InputKey();
 		p.addKeyListener(keys);
 		frame.setVisible(true);
+
+    this.level("./levels/1.txt");
 	}
 
   void level(String fn) {
@@ -95,6 +95,7 @@ public class window {
         }
         this.end = this.nn.new Vec2(max_x, 1e3);
       }
+      this.platforms.add(new platform((int) this.end.x, 0, (int) ((this.end.x/this.width)+1)*width, this.height, this.nn));
     } catch (Exception e) {
       System.out.println(e);
       System.out.println(String.format("Can't read file: %s", fn));
@@ -137,7 +138,7 @@ public class window {
         if (info.containsKey("health")) {
           p.setHealth(Double.parseDouble(info.get("health")));
         }
-        platforms.add(p);
+        this.platforms.add(p);
       }
     }
   }

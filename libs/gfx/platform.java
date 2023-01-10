@@ -38,7 +38,9 @@ public class platform {
     int px = (int) pos.x, py = (int) pos.y;
     return (this.pos.x > (px/scope)*scope && this.pos.x < (px/scope+1)*scope);
   }
-
+  public void modify(int w, int h) {
+    this.dimensions = this.nn.new Vec2(w,h);
+  }
   public void setHealth(double h) {
     this.health = h;
     this.damageable = true;

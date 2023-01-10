@@ -2,6 +2,7 @@ package libs.gfx;
 
 import libs.math.*;
 import libs.functionality.*;
+import javax.script.*;
 import java.io.*;
 import libs.gfx.sprite;
 import javax.swing.*;
@@ -16,7 +17,7 @@ public class window {
 	private final int 
     FRAME_PERIOD = 120, BASE_HEIGHT = 500, JUMP_HEIGHT = 100, BULLET_TICKS = 300, SHOOT_TICK = 20, JUMP_TICKS=10;
   private long last=0;
-  private double fps, TICK_SCALE = FRAME_PERIOD/60.0, GRAVITY=4.0/TICK_SCALE;
+  private double fps, TICK_SCALE = FRAME_PERIOD/60.0, GRAVITY=6.0/TICK_SCALE;
   neo nn = new neo();
   neo.Vec2 end;
 	JFrame frame;
@@ -25,19 +26,16 @@ public class window {
 	int width, height;
 	ArrayList<sprite> sprites = new ArrayList<sprite>();
 	ArrayList<platform> platforms = new ArrayList<platform>();
-  ArrayList<mob> mobs = new ArrayList<mob>();
+  ArrayList<spawn.mob> mobs = new ArrayList<spawn.mob>();
 	player main;
+  platform ground;
 	public window(String w_title, int w, int h) {
 		width = w;
 		height = h;
-		main = new player("sprites/animated.bmp", w/2, h-BASE_HEIGHT, 4, 4, this.nn);
+		main = new player("sprites/animated.bmp", w/2, h/2, 4, 4, this.nn);
     main.equipped = new weapon("fists", 30, this.nn);
     main.shot_tick = SHOOT_TICK*FRAME_PERIOD;
     main.inventory.add(main.equipped);
-		platform ground = new platform(0, h-BASE_HEIGHT+(int) main.dimensions().x-1, w, h, "grey", this.nn);
-		ground.infinite = true;
-		ground.collide = false;
-		platforms.add(ground);
 
 		sprites.add(main);
 		frame = new JFrame(w_title);
@@ -49,7 +47,21 @@ public class window {
 		p.addKeyListener(keys);
 		frame.setVisible(true);
 
+    frame.addComponentListener(new ComponentAdapter() {
+      public void componentResized(ComponentEvent e) {
+        width = frame.getWidth();
+        height = frame.getHeight();
+        end = nn.new Vec2(width, height);
+      }
+    });
+
     this.level("./levels/1.txt");
+
+    ground = new platform(100, 1200, width-200, 100, "grey", this.nn);
+
+    platforms.add(ground);
+
+    this.end = this.nn.new Vec2(width, height);
 	}
 
   void level(String fn) {
@@ -143,13 +155,6 @@ public class window {
     }
   }
 
-
-
-  double eval(String expr) {
-    System.out.println(expr);
-    return 1.0;
-  }
-
 	public void adjust() {
 		/* relative_pos: relative position on screen
 			 mainpos: distance from starting point (0, h/2) */
@@ -162,7 +167,8 @@ public class window {
       }
     }
 		main.relative_pos.x = this.nn.mod((int) main.relative_pos.x, width);
-		main.relative_pos.y = this.nn.mod((int) main.relative_pos.y, width);
+		main.relative_pos.y = this.nn.mod((int) main.relative_pos.y, height);
+    main.pos.y = this.nn.mod((int) main.pos.y, height);
 	}
 
 	public void exec() {

@@ -13,9 +13,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 public class window {
-  // all tick rates are based on 60...
+  // all tick rates are based on 60.
 	private final int 
-    FRAME_PERIOD = 120, JUMP_HEIGHT = 150, DOUBLE_JUMP = 200, BULLET_TICKS = 300, SHOOT_TICK = 20, JUMP_TICKS=10,
+    FRAME_PERIOD = 120, JUMP_HEIGHT = 150, DOUBLE_JUMP = 210, BULLET_TICKS = 300, SHOOT_TICK = 20, JUMP_TICKS=15,
     BOUNCER_HEIGHT = 5, BOUNCER_WIDTH = 100;
   private double fps, TICK_SCALE = FRAME_PERIOD/60.0, GRAVITY=10.0/TICK_SCALE, LAST=0;
   int jf=0, djf=0;
@@ -63,7 +63,6 @@ public class window {
     this.platforms.add(ground);
     this.bouncers.add(new bouncer(ground, BOUNCER_WIDTH, BOUNCER_HEIGHT, this.nn));
 
-    this.end = this.nn.new Vec2(width, height-main.dimensions().x);
 	}
 
   void level(String fn) {
@@ -102,6 +101,8 @@ public class window {
         int px = Integer.parseInt(endl.substring(0, endl.indexOf(",")).strip()), 
             py = Integer.parseInt(endl.substring(endl.indexOf(",")+1).strip());
         this.end = this.nn.new Vec2(px, py);
+      } else {
+        this.end = this.nn.new Vec2(this.width-main.dimensions().x, this.height);
       }
     } catch (Exception e) {
       System.out.println(e);
@@ -171,7 +172,7 @@ public class window {
 		while (true) {
 			frame.repaint();
       main.bounce(bouncers);
-			main.move(platforms, TICK_SCALE);
+			main.move(platforms, this.end, TICK_SCALE);
       main.shot_tick++;
       main.jump_tick++;
       main.ddt++;
@@ -239,14 +240,12 @@ public class window {
           p.render(g, width, height);
 				}
 			}
+
       for (bouncer b : bouncers) {
         if (b.visible(main.pos, width)) { 
           b.render(g, width, height);
         }
       }
-
-
-
 
 			for (sprite x : sprites) {
 				if (x.loaded) {
@@ -270,7 +269,6 @@ public class window {
 	};
 
 	public class InputKey implements KeyListener {
-
 		public void keyPressed(KeyEvent e) {
 			/* left , up, right, down 
 			 	 [ 37, 38, 39, 40 ] */

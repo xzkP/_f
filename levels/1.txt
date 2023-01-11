@@ -1,5 +1,4 @@
 level: 1
-end: [5000, 1000]
 platforms: {
   {
     position: [550, 700]

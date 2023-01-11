@@ -21,7 +21,8 @@ public class player extends sprite {
     vel = nn.new Vec2(0, 0);
   }
 
-  void move(ArrayList<platform> platforms, double TICK_SCALE) {
+  void move(ArrayList<platform> platforms, neo.Vec2 end, double TICK_SCALE) {
+    System.out.println(end);
     double movement_scalar = 5.0;
     if (this.directions[0] == this.directions[1] == this.directions[2] == this.directions[3] == false) {
       this.source_dim.y=0;
@@ -32,8 +33,8 @@ public class player extends sprite {
         if (i%2==0) {
           this.forward = (i==2);
           this.source_dim.y = (this.dimensions().x*(1+(i>0?0:1)));
-          move_vector = nn.new Vec2((i-(i%2)>0)?1:-1, 0).scale(movement_scalar);
-          if (!(Double.compare(this.pos.x+move_vector.x, 0) < 0 && Double.compare(this.pos.x, 0) <= 0) 
+          move_vector = nn.new Vec2((i-(i%2)>0)?1:-1, 0).scale(movement_scalar).add(this.vel);
+          if (Double.compare(this.pos.x+move_vector.x, 0) >= 0 && Double.compare(this.pos.x+move_vector.x, end.x) <= 0  
               && !this.collide(platforms, this.pos.add(move_vector))) {
             this.mod_pos(move_vector);
           }
@@ -69,8 +70,9 @@ public class player extends sprite {
   public void bounce(ArrayList<bouncer> bouncers) {
     ArrayList<platform> tc = new ArrayList<platform>(bouncers);
     if (this.collide(tc, this.pos)) {
-      this.pos.y -= 1000;
-      this.relative_pos.y -= 1000;
+      this.jumps[2] = true;
+      this.ddt = 0;
+      this.mod_pos(0, -1000);
     }
   }
 

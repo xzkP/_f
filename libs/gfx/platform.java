@@ -1,5 +1,4 @@
 package libs.gfx;
-
 import libs.math.*;
 import libs.functionality.*;
 import java.awt.*;
@@ -74,4 +73,11 @@ public class platform {
 	public void assign_color(int R, int G, int B, int A) {
 		pc = new Color(R, G, B, A);
 	}
+  public void render(Graphics g, int width, int height) {
+    g.setColor(this.pc);
+    g.fillRect(nn.mod((int) this.pos.x, width), nn.mod((int) this.pos.y, height), (int) this.dimensions.x, (int) this.dimensions.y);
+  }
+  public boolean under(player main, neo.Vec2 position) {
+    return (((position.x+main.dimensions().x >= this.pos.x && position.x+main.dimensions().x <= this.pos.x+this.dimensions.x) || (position.x >= this.pos.x && position.x <= this.pos.x+this.dimensions.x) || this.infinite) && position.y+main.dimensions().y >= this.pos.y && position.y+main.dimensions().y <= this.pos.y+5);
+  }
 };

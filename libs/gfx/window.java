@@ -15,24 +15,25 @@ import java.util.Iterator;
 public class window {
   // all tick rates are based on 60...
 	private final int 
-    FRAME_PERIOD = 120, BASE_HEIGHT = 500, JUMP_HEIGHT = 100, BULLET_TICKS = 300, SHOOT_TICK = 20, JUMP_TICKS=10;
-  private long last=0;
-  private double fps, TICK_SCALE = FRAME_PERIOD/60.0, GRAVITY=6.0/TICK_SCALE;
+    FRAME_PERIOD = 120, JUMP_HEIGHT = 150, DOUBLE_JUMP = 200, BULLET_TICKS = 300, SHOOT_TICK = 20, JUMP_TICKS=10,
+    BOUNCER_HEIGHT = 5, BOUNCER_WIDTH = 100;
+  private double fps, TICK_SCALE = FRAME_PERIOD/60.0, GRAVITY=10.0/TICK_SCALE, LAST=0;
+  int jf=0, djf=0;
   neo nn = new neo();
   neo.Vec2 end;
 	JFrame frame;
 	Panel p;
 	InputKey keys;
 	int width, height;
-	ArrayList<sprite> sprites = new ArrayList<sprite>();
-	ArrayList<platform> platforms = new ArrayList<platform>();
-  ArrayList<spawn.mob> mobs = new ArrayList<spawn.mob>();
 	player main;
   platform ground;
+	ArrayList<sprite> sprites = new ArrayList<sprite>();
+	ArrayList<platform> platforms = new ArrayList<platform>();
+  ArrayList<bouncer> bouncers = new ArrayList<bouncer>();
 	public window(String w_title, int w, int h) {
 		width = w;
 		height = h;
-		main = new player("sprites/animated.bmp", w/2, h/2, 4, 4, this.nn);
+		main = new player("sprites/animated.bmp", w/2, 0, 4, 4, this.nn);
     main.equipped = new weapon("fists", 30, this.nn);
     main.shot_tick = SHOOT_TICK*FRAME_PERIOD;
     main.inventory.add(main.equipped);
@@ -57,11 +58,12 @@ public class window {
 
     this.level("./levels/1.txt");
 
-    ground = new platform(100, 1200, width-200, 100, "grey", this.nn);
 
-    platforms.add(ground);
+    this.ground = new platform(100, 1200, width-200, 100, "grey", this.nn);
+    this.platforms.add(ground);
+    this.bouncers.add(new bouncer(ground, BOUNCER_WIDTH, BOUNCER_HEIGHT, this.nn));
 
-    this.end = this.nn.new Vec2(width, height);
+    this.end = this.nn.new Vec2(width, height-main.dimensions().x);
 	}
 
   void level(String fn) {
@@ -100,14 +102,7 @@ public class window {
         int px = Integer.parseInt(endl.substring(0, endl.indexOf(",")).strip()), 
             py = Integer.parseInt(endl.substring(endl.indexOf(",")+1).strip());
         this.end = this.nn.new Vec2(px, py);
-      } else { // ?
-        int max_x = 0;
-        for (platform p : platforms) {
-          max_x = Math.max((int) p.pos.x, max_x);
-        }
-        this.end = this.nn.new Vec2(max_x, 1e3);
       }
-      this.platforms.add(new platform((int) this.end.x, 0, (int) ((this.end.x/this.width)+1)*width, this.height, this.nn));
     } catch (Exception e) {
       System.out.println(e);
       System.out.println(String.format("Can't read file: %s", fn));
@@ -172,23 +167,25 @@ public class window {
 	}
 
 	public void exec() {
-    int delay = 35, jf = 0;
+    int delay = 35;
 		while (true) {
 			frame.repaint();
-			main.move(platforms, end, TICK_SCALE);
+      main.bounce(bouncers);
+			main.move(platforms, TICK_SCALE);
       main.shot_tick++;
       main.jump_tick++;
-      main.jumps[0]= (main.jump_tick >= delay*TICK_SCALE);
-      if (main.jumps[1]) {
-        main.pos = main.pos.add(this.nn.new Vec2(0, -JUMP_HEIGHT/JUMP_TICKS));
-        main.relative_pos = main.relative_pos.add(this.nn.new Vec2(0, -JUMP_HEIGHT/JUMP_TICKS));
-        jf++;
-        if (jf >= JUMP_TICKS) { jf = 0; main.jumps[1] = false; };
+      main.ddt++;
+      main.jumps[0] = (main.jump_tick >= delay*TICK_SCALE);
+      this.jump(1); this.jump(3);
+			if (!main.on_surface(platforms, main.pos)) {
+        if (!main.jumps[1]) {
+          main.mod_pos(0, GRAVITY);
+        }
+			} else {
+        main.jumps[2] = true;
+        main.ddt = 0;
       }
-			if (!main.on_surface(platforms, main.pos) && !main.jumps[1]) {
-				main.pos.y += GRAVITY;
-				main.relative_pos.y += GRAVITY;
-			}
+
 
       for (weapon w : main.inventory) {
         w.update((int) (BULLET_TICKS*TICK_SCALE));
@@ -199,6 +196,19 @@ public class window {
 			try { Thread.sleep(1000/FRAME_PERIOD); } catch (Exception e) {}; 
 		}
 	}
+
+  public void jump(int index) {
+    boolean djump = (index == 1 ? false : true);
+    if (main.jumps[index]) {
+      neo.Vec2 jvec = this.nn.new Vec2(0, -(djump ? DOUBLE_JUMP : JUMP_HEIGHT)/JUMP_TICKS);
+      main.mod_pos(jvec);
+      if (djump) { djf++; } else { jf++; }
+      if ((djump ? djf : jf) >= JUMP_TICKS) {
+        if (djump) { djf = 0; } else { jf = 0; }
+        main.jumps[index] = false;
+      }
+    }
+  }
 
 	class Panel extends JPanel {
     private long last=0;
@@ -226,10 +236,17 @@ public class window {
 			for (platform p : platforms) {
 				p.pos.x += (p.pos.x%50==0?1:0);
 				if ((p.infinite || p.visible(main.pos, width)) && p.health > 0) {
-					g.setColor(p.pc);
-					g.fillRect(nn.mod((int) p.pos.x, width), nn.mod((int) p.pos.y, height), (int) p.dimensions.x, (int) p.dimensions.y);
+          p.render(g, width, height);
 				}
 			}
+      for (bouncer b : bouncers) {
+        if (b.visible(main.pos, width)) { 
+          b.render(g, width, height);
+        }
+      }
+
+
+
 
 			for (sprite x : sprites) {
 				if (x.loaded) {

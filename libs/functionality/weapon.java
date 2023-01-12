@@ -32,10 +32,12 @@ public class weapon {
   public void collide(ArrayList<platform> platforms) {
     for (Iterator<bullet> i=bullets.iterator(); i.hasNext();) {
       bullet b = i.next();
-      Shape boundary = new Rectangle2D.Double(b.position.x, b.position.y, b.img.dimensions().x, b.img.dimensions().y);
+      neo.Vec2 bdim = b.img.dimensions();
+      Shape boundary = new Rectangle2D.Double(b.position.x, b.position.y, bdim.x, bdim.y);
       for (platform p : platforms) {
         if (p.collide) {
-          Shape pb = new Rectangle2D.Double(p.get_pos().x, p.get_pos().y, p.get_dimensions().x, p.get_dimensions().y);
+          neo.Vec2 pdim = p.get_dimensions();
+          Shape pb = new Rectangle2D.Double(p.get_pos().x, p.get_pos().y, pdim.x, pdim.y);
           if (boundary.intersects((Rectangle2D) pb)) {
             try { 
               i.remove(); p.shoot(b);
@@ -49,10 +51,33 @@ public class weapon {
   public void render(Graphics g, neo.Vec2 scope, neo.Vec2 dimensions) {
     int px = (int) scope.x, py = (int) scope.y, dx = (int) dimensions.x, dy = (int) dimensions.y;
     int lb_x = (px/dx)*dx, ub_x = (px/dx+1)*dx;
+
     for (bullet b : bullets) {
+      neo.Vec2 dim = b.img.dimensions();
       if (b.position.x > lb_x && b.position.x < ub_x) {
         int dpx = ((int)(b.position.x))%((int)(dimensions.x)), dpy = ((int)(b.position.y))%((int)(dimensions.y));
-        g.drawImage(b.img.get_img(), dpx, dpy, dpx+(int)(b.img.dimensions().x), dpy+(int)(b.img.dimensions().y), 0, 0, 32, 32, null);
+        g.drawImage(b.img.get_img(), dpx, dpy, dpx+(int)(dim.x), dpy+(int)(dim.y), 0, 0, 32, 32, null);
+      }
+    }
+  }
+
+  public void hit(ArrayList<player> players, int index) {
+    int count = 0;
+    for (Iterator<bullet> i=bullets.iterator(); i.hasNext();) {
+      bullet b = i.next();
+      neo.Vec2 bdim = b.img.dimensions(), pdim;
+      Shape bullet_bound = new Rectangle2D.Double(b.position.x, b.position.y, bdim.x, bdim.y);
+      for (int n = 0; n < players.size(); n++) {
+        if (n == index) continue;
+        player p = players.get(n);
+        pdim = p.dimensions();
+        Shape hitbox = new Rectangle2D.Double(p.position().x, p.position().y, pdim.x, pdim.y);
+        if (bullet_bound.intersects((Rectangle2D) hitbox)) {
+          try {
+            i.remove(); 
+            p.mod_vel(b.forward?1:-1*3, -5);
+          } catch (Exception e) {}
+        }
       }
     }
   }

@@ -20,7 +20,7 @@ public class bullet {
     return (Math.random()<=0.15 ? (Math.random()+1)*(1+Math.random())*dmg: dmg); 
   }
   public void update() {
-    this.position.x += (forward?1:-1)*5;
+    this.position.x += (forward?1:-1)*7.5;
     this.img.img_update(2);
     cticks++;
   }

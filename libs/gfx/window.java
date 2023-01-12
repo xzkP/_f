@@ -15,9 +15,8 @@ import java.util.Iterator;
 public class window {
   // all tick rates are based on 60.
 	private final int 
-    FRAME_PERIOD = 120, JUMP_HEIGHT = 150, DOUBLE_JUMP = 210, BULLET_TICKS = 300, SHOOT_TICK = 20, JUMP_TICKS=15,
-    BOUNCER_HEIGHT = 5, BOUNCER_WIDTH = 100;
-  private double fps, TICK_SCALE = FRAME_PERIOD/60.0, GRAVITY=10.0/TICK_SCALE, LAST=0;
+    FRAME_PERIOD = 120, BULLET_TICKS = 300, BOUNCER_HEIGHT = 5, BOUNCER_WIDTH = 100;
+  private double fps, TICK_SCALE = FRAME_PERIOD/60.0, JUMP_GRAVITY=0.7/TICK_SCALE, FALL_GRAVITY=0.15/TICK_SCALE, LAST=0, JUMP_FORCE=15.0;
   int jf=0, djf=0;
   neo nn = new neo();
   neo.Vec2 end;
@@ -25,20 +24,41 @@ public class window {
 	Panel p;
 	InputKey keys;
 	int width, height;
-	player main;
+	player p1, p2;
   platform ground;
-	ArrayList<sprite> sprites = new ArrayList<sprite>();
+  ArrayList<player> players = new ArrayList<player>();
 	ArrayList<platform> platforms = new ArrayList<platform>();
   ArrayList<bouncer> bouncers = new ArrayList<bouncer>();
 	public window(String w_title, int w, int h) {
 		width = w;
 		height = h;
-		main = new player("sprites/animated.bmp", w/2, 0, 4, 4, this.nn);
-    main.equipped = new weapon("fists", 30, this.nn);
-    main.shot_tick = SHOOT_TICK*FRAME_PERIOD;
-    main.inventory.add(main.equipped);
+		p1 = new player("sprites/animated.bmp", w/2, 0, 4, 4, this.nn);
+    p1.equipped = new weapon("fists", 30, this.nn);
+    p1.inventory.add(p1.equipped);
+    p1.movement = new HashMap<Character, Integer>() {{
+      put('←', 0);
+      put('↑', 1);
+      put('→', 2);
+      put('↓', 3);
+      put('Z', 4);
+    }};
 
-		sprites.add(main);
+    p2 = new player("sprites/animated.bmp", w/2, 0, 4, 4, this.nn);
+    p2.equipped = new weapon("fists", 30, this.nn);
+    p2.inventory.add(p2.equipped);
+
+    p2.movement = new HashMap<Character, Integer>() {{
+      put('A', 0);
+      put('W', 1);
+      put('D', 2);
+      put('S', 3);
+      put('J', 4);
+    }};
+
+
+    players.add(p1);
+    players.add(p2);
+
 		frame = new JFrame(w_title);
 		p = new Panel();
 		frame.setSize(width, height);
@@ -59,10 +79,9 @@ public class window {
     this.level("./levels/1.txt");
 
 
-    this.ground = new platform(100, 1200, width-200, 100, "grey", this.nn);
+    this.ground = new platform(100, 800, width-200, 100, "grey", this.nn);
     this.platforms.add(ground);
     this.bouncers.add(new bouncer(ground, BOUNCER_WIDTH, BOUNCER_HEIGHT, this.nn));
-
 	}
 
   void level(String fn) {
@@ -100,10 +119,8 @@ public class window {
         String endl = metadata.get("end").get(0).replace("{","").replace("}","").replace("[","").replace("]","").strip();
         int px = Integer.parseInt(endl.substring(0, endl.indexOf(",")).strip()), 
             py = Integer.parseInt(endl.substring(endl.indexOf(",")+1).strip());
-        this.end = this.nn.new Vec2(px, py);
-      } else {
-        this.end = this.nn.new Vec2(this.width-main.dimensions().x, this.height);
-      }
+      } 
+      this.end = this.nn.new Vec2(this.width, this.height);
     } catch (Exception e) {
       System.out.println(e);
       System.out.println(String.format("Can't read file: %s", fn));
@@ -152,8 +169,6 @@ public class window {
   }
 
 	public void adjust() {
-		/* relative_pos: relative position on screen
-			 mainpos: distance from starting point (0, h/2) */
     for (Iterator<platform> p=platforms.iterator(); p.hasNext();) {
       platform pp = p.next();
       if (pp.health <= 0) {
@@ -162,54 +177,54 @@ public class window {
         } catch (Exception e) {}
       }
     }
-		main.relative_pos.x = this.nn.mod((int) main.relative_pos.x, width);
-		main.relative_pos.y = this.nn.mod((int) main.relative_pos.y, height);
-    main.pos.y = this.nn.mod((int) main.pos.y, height);
+
+    for (player player : players) {
+      player.pos.x = this.nn.mod((int) player.pos.x, width);
+      player.pos.y = this.nn.mod((int) player.pos.y, height);
+      player.pos.x = this.nn.mod((int) player.pos.x, width);
+      player.pos.y = this.nn.mod((int) player.pos.y, height);
+    }
 	}
 
 	public void exec() {
     int delay = 35;
 		while (true) {
 			frame.repaint();
-      main.bounce(bouncers);
-			main.move(platforms, this.end, TICK_SCALE);
-      main.shot_tick++;
-      main.jump_tick++;
-      main.ddt++;
-      main.jumps[0] = (main.jump_tick >= delay*TICK_SCALE);
-      this.jump(1); this.jump(3);
-			if (!main.on_surface(platforms, main.pos)) {
-        if (!main.jumps[1]) {
-          main.mod_pos(0, GRAVITY);
+      for (player player : players) {
+        player.bounce(bouncers);
+        player.jump_tick++;
+        player.ddt++;
+        player.jumps[0] = (player.jump_tick >= delay*TICK_SCALE);
+        boolean surface = player.on_surface(platforms, player.pos);
+        if (!surface) {
+          if (player.jumps[1]) {
+            player.vel.y = (-player.JUMP_FORCE+(player.jump_tick)*JUMP_GRAVITY);
+          } else {
+            player.vel.y += FALL_GRAVITY*2;
+            player.vel.y = Math.min(100, player.vel.y);
+          }
+        } else {
+          player.jumps = new boolean[]{player.jumps[0], false, true, false };
+          player.ddt = 0;
+          player.vel.x = 0;
+          player.vel.y = 0;
         }
-			} else {
-        main.jumps[2] = true;
-        main.ddt = 0;
-      }
+
+        player.move(platforms, this.end, TICK_SCALE);
+        player.mod_pos(player.vel);
+        
 
 
-      for (weapon w : main.inventory) {
-        w.update((int) (BULLET_TICKS*TICK_SCALE));
-        w.collide(platforms);
+        for (weapon w : player.inventory) {
+          w.update((int) (BULLET_TICKS*TICK_SCALE));
+          w.collide(platforms);
+        }
       }
 
 			this.adjust();
 			try { Thread.sleep(1000/FRAME_PERIOD); } catch (Exception e) {}; 
 		}
 	}
-
-  public void jump(int index) {
-    boolean djump = (index == 1 ? false : true);
-    if (main.jumps[index]) {
-      neo.Vec2 jvec = this.nn.new Vec2(0, -(djump ? DOUBLE_JUMP : JUMP_HEIGHT)/JUMP_TICKS);
-      main.mod_pos(jvec);
-      if (djump) { djf++; } else { jf++; }
-      if ((djump ? djf : jf) >= JUMP_TICKS) {
-        if (djump) { djf = 0; } else { jf = 0; }
-        main.jumps[index] = false;
-      }
-    }
-  }
 
 	class Panel extends JPanel {
     private long last=0;
@@ -226,45 +241,45 @@ public class window {
        ImageObserver observer); */
 			p.setBackground(Color.black);
 
-      text fps_display = new text("", 15, 30, "0xFFFFFF"), pos_display = new text("", 15, 60, "0xFFFFFF");
-      pos_display.update_msg(String.format("(%.2f, %.2f)", main.pos.x, main.pos.y));
+      text fps_display = new text("", 15, 30, "0xFFFFFF"), pos_display = new text("", 15, 60, "0xFFFFFF"), velocity = new text("", 15, 90, "0xFFFFFF");
+      pos_display.update_msg(String.format("(%.2f, %.2f)", p1.pos.x, p1.pos.y));
       fps_display.update_msg(String.format("FPS: %f", ((double) 1e9)/(System.nanoTime()-last)));
+      velocity.update_msg(String.format("(%.2f, %.2f)", p1.vel.x, p1.vel.y));
       last = System.nanoTime();
       pos_display.renderText(g);
+      velocity.renderText(g);
       fps_display.renderText(g);
 
 			// check if platform is in viewing distance + render
 			for (platform p : platforms) {
 				p.pos.x += (p.pos.x%50==0?1:0);
-				if ((p.infinite || p.visible(main.pos, width)) && p.health > 0) {
+				if ((p.infinite || p.visible(p1.pos, width)) && p.health > 0) {
           p.render(g, width, height);
 				}
 			}
 
       for (bouncer b : bouncers) {
-        if (b.visible(main.pos, width)) { 
+        if (b.visible(p1.pos, width)) { 
           b.render(g, width, height);
         }
       }
 
-			for (sprite x : sprites) {
-				if (x.loaded) {
-					g.drawImage(x.img, (int) x.relative_pos.x, (int) x.relative_pos.y, 
-							(int) (x.relative_pos.x+x.dimensions().x), (int) (x.relative_pos.y+x.dimensions().y),
-              (int) x.source_dim.x, (int) x.source_dim.y,
-							(int) (x.source_dim.x+x.dimensions().x), (int) (x.source_dim.y+x.dimensions().y),
-							null);
-
-          if (x instanceof player) {
-            player p = (player) x;
-            for (weapon w : p.inventory) w.render(g, p.pos, nn.new Vec2(width, height));
-          } else {
-            x.equipped.render(g, x.pos, nn.new Vec2(width, height));
+      for (int i = 0;  i < players.size(); i++) {
+        player x = players.get(i);
+        if (x.loaded) {
+          neo.Vec2 dim = x.dimensions();
+          g.drawImage(x.img, (int) x.pos.x, (int) x.pos.y,
+              (int) (x.pos.x+dim.x), (int) (x.pos.y+dim.y),
+              (int) (x.source_dim.x), (int) (x.source_dim.y), 
+              (int) (x.source_dim.x+dim.x), (int) (x.source_dim.y+dim.y), null);
+          for (weapon wp : x.inventory) {
+            wp.render(g, x.pos, nn.new Vec2(width, height));
+            wp.hit(players, i);
           }
-				} else {
-					System.out.println("Unable to open sprite");
-				}
-			}
+        } else {
+          System.out.println("Unable to open sprite, not loaded");
+        }
+      }
 		}
 	};
 
@@ -273,22 +288,28 @@ public class window {
 			/* left , up, right, down 
 			 	 [ 37, 38, 39, 40 ] */
       char key = KeyEvent.getKeyText(e.getKeyCode()).charAt(0);
-      int k_t = e.getKeyCode();
-
-      if (k_t == 32 && main.shot_tick >= SHOOT_TICK*TICK_SCALE) {
-        main.shot_tick = 0;
-        main.shoot();
+      for (player p : players) {
+        if (p.movement.containsKey(key)) {
+          int index = p.movement.get(key);
+          if (index >= 0 && index <= 3) {
+            p.directions[index] = true;
+          } else {
+            p.action(index);
+          }
+        }
       }
-			if (k_t >= 37 && k_t <= 40) {
-				main.directions[k_t-37] = true;
-			}
 		}
 
 		public void keyReleased(KeyEvent e) {
-			int k_t = e.getKeyCode();
-			if (k_t >= 37 && k_t <= 40) {
-				main.directions[k_t-37] = false;
-			}
+      char key = KeyEvent.getKeyText(e.getKeyCode()).charAt(0);
+      for (player p : players) {
+        if (p.movement.containsKey(key)) {
+          int index = p.movement.get(key);
+          if (index >= 0 && index <= 3) {
+            p.directions[index] = false;
+          } 
+        }
+      }
 		}
 		public void keyTyped(KeyEvent e) {}
 	};

@@ -17,6 +17,9 @@ public class neo {
 		public Vec2 add(Vec2 v2) {
 			return new Vec2(x+v2.x, y+v2.y);
 		}
+    public Vec2 add(double p_x, double p_y) {
+      return new Vec2(x+p_x, y+p_y);
+    }
 		public Vec2 subtract(Vec2 v2) {
 			return add(v2.scale(-1));
 		}

@@ -78,6 +78,11 @@ public class platform {
     g.fillRect(nn.mod((int) this.pos.x, width), nn.mod((int) this.pos.y, height), (int) this.dimensions.x, (int) this.dimensions.y);
   }
   public boolean under(player main, neo.Vec2 position) {
-    return (((position.x+main.dimensions().x >= this.pos.x && position.x+main.dimensions().x <= this.pos.x+this.dimensions.x) || (position.x >= this.pos.x && position.x <= this.pos.x+this.dimensions.x) || this.infinite) && position.y+main.dimensions().y >= this.pos.y && position.y+main.dimensions().y <= this.pos.y+5);
+    neo.Vec2 dim = main.dimensions();
+    return (((position.x+dim.x >= this.pos.x && position.x+dim.x <= this.pos.x+this.dimensions.x) || (position.x >= this.pos.x && position.x <= this.pos.x+this.dimensions.x) || this.infinite) && position.y+dim.y >= this.pos.y && position.y+dim.y <= this.pos.y+this.dimensions.y);
+  }
+  @Override
+  public String toString() {
+    return String.format("(%.2f, %.2f)", this.get_pos().x, this.get_pos().y);
   }
 };

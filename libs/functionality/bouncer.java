@@ -6,6 +6,7 @@ import libs.math.*;
 
 // bounce pad.
 public class bouncer extends platform {
+  final double FORCE=10.0;
   // all bouncepads have the same width (avoid unecessary confusion)
   public bouncer(int x, int y, int w, int h, neo nn) {
     super(x, y, 100, 10, "white", nn);

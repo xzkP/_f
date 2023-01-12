@@ -157,7 +157,7 @@ public class window {
         p_v = this.nn.new Vec2(Integer.parseInt(p1), Integer.parseInt(p2));
         d_v = this.nn.new Vec2(Integer.parseInt(d1), Integer.parseInt(d2));
         String hex = (info.containsKey("hex")?info.get("hex"):"222222"), title=(info.containsKey("title")?info.get("title"):String.format("P%d", this.platforms.size()));
-        // assuming that platform is square (TODO: add other shapes)
+        // assuming that platform is rectangular (TODO: add other shapes)
         platform p = new platform((int) p_v.x, (int) p_v.y, (int) d_v.x, (int) d_v.y, this.nn);
         p.assign_color(Integer.parseInt(hex, 16));
         if (info.containsKey("health")) {

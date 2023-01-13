@@ -26,7 +26,7 @@ public class weapon {
         bullet b = i.next();
         b.update();
         if (b.cticks >= TICKS) { i.remove(); }
-      } catch (Exception e) {}
+      } catch (Exception e) { System.out.println(e); }
     } 
   }
   public void collide(ArrayList<platform> platforms) {
@@ -40,8 +40,9 @@ public class weapon {
           Shape pb = new Rectangle2D.Double(p.get_pos().x, p.get_pos().y, pdim.x, pdim.y);
           if (boundary.intersects((Rectangle2D) pb)) {
             try { 
-              i.remove(); p.shoot(b);
-            } catch (Exception e) {}
+              p.shoot(b);
+              i.remove();
+            } catch (Exception e) { System.out.println(e); }
           }
         }
       }
@@ -59,7 +60,7 @@ public class weapon {
           g.drawImage(b.img.get_img(), dpx, dpy, dpx+(int)(dim.x), dpy+(int)(dim.y), 0, 0, 32, 32, null);
         }
       }
-    } catch (Exception e) {}
+    } catch (Exception e) { System.out.println(e); }
   }
   public void hit(ArrayList<player> players, int index, Graphics g, ArrayList<text> q)  {
     int count = 0;
@@ -77,12 +78,12 @@ public class weapon {
             neo.Vec2 position = p.position();
             text dmg = new text(String.format("%.2f", b.dmg), (int) position.x, (int) (position.y-p.dimensions().y), "0xFFFFFF");
             q.add(dmg);
-            i.remove(); 
             p.mod_vel(b.forward?1:-1*3, -5);
+            i.remove(); 
           }
         }
       }
-    } catch (Exception e) {}
+    } catch (Exception e) { System.out.println(e); }
   }
   public void shoot(neo.Vec2 p, boolean f) {
     neo nn = new neo();
@@ -92,6 +93,11 @@ public class weapon {
     b.position.x += (f?1:-1)*b.img.dimensions().x;
     b.forward = f;
     bullets.add(b);
+  }
+  public void erase() {
+    try {
+      this.bullets.clear();
+    } catch (Exception e) { System.out.println(e); }
   }
   @Override
   public String toString() {

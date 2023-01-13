@@ -13,11 +13,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import javax.imageio.ImageIO;
 
-
 public class window {
   // all tick rates are based on 60.
 	private final int 
-    FRAME_PERIOD = 120, BULLET_TICKS = 300, BOUNCER_HEIGHT = 5, BOUNCER_WIDTH = 100, DEATH=300;
+    FRAME_PERIOD = 120, BULLET_TICKS = 300, BOUNCER_HEIGHT = 5, BOUNCER_WIDTH = 100, DEATH=600;
   private double fps, TICK_SCALE = FRAME_PERIOD/60.0, JUMP_GRAVITY=0.7/TICK_SCALE, FALL_GRAVITY=0.15/TICK_SCALE, LAST=0, JUMP_FORCE=15.0;
   int jf=0, djf=0;
   neo nn = new neo();
@@ -31,30 +30,30 @@ public class window {
 	ArrayList<platform> platforms = new ArrayList<platform>();
   ArrayList<bouncer> bouncers = new ArrayList<bouncer>();
   ArrayList<text> queue = new ArrayList<text>();
-  Image bg;
+  int hex_bg = Integer.valueOf("BC4A3C", 16);
+  Color bg;
 	public window(String w_title, int w, int h) {
+    bg = new Color(hex_bg>>16&0xFF, hex_bg>>8&0xFF, hex_bg&0xFF);
 		this.width = w;
 		this.height = h;
-    /*
-    try {
-      this.bg = ImageIO.read(new File("./sprites/bg.png"));
-    } catch (Exception e) {}*/
-		p1 = new player("./sprites/animated.bmp", w/2, 0, 4, 4, this.nn);
+ 		p1 = new player("./sprites/spritesheet_f.bmp", w/2, 0, 4, 4, this.nn);
     p1.movement = new HashMap<Character, Integer>() {{
       put('←', 0);
       put('↑', 1);
       put('→', 2);
       put('↓', 3);
-      put('Z', 4);
+      put('N', 4);
+      put('M', 5);
     }};
 
-    p2 = new player("./sprites/animated.bmp", w/2, 0, 4, 4, this.nn);
+    p2 = new player("./sprites/spritesheet_f.bmp", w/2, 0, 4, 4, this.nn);
     p2.movement = new HashMap<Character, Integer>() {{
       put('A', 0);
       put('W', 1);
       put('D', 2);
       put('S', 3);
-      put('J', 4);
+      put('T', 4);
+      put('Y', 5);
     }};
 
 
@@ -169,7 +168,9 @@ public class window {
       if (pp.health <= 0) {
         try { 
           p.remove();
-        } catch (Exception e) {}
+        } catch (Exception e) { 
+          System.out.println(e); 
+        }
       }
     }
 	}
@@ -181,12 +182,20 @@ public class window {
       for (player player : players) {
         if (player.permeate && !player.collide(player.pt, player.pos)) {
           player.permeate = false;
-          player.pt = null;
         }
         player.bounce(bouncers);
         player.jump_tick++;
         player.ddt++;
         player.jumps[0] = (player.jump_tick >= delay*TICK_SCALE);
+
+
+        if (player.dash[0]) {
+          player.vel.x = (player.dash[1]?Math.max(0, player.vel.x-0.25):Math.min(0, player.vel.x+0.25));
+          if (Double.compare(player.vel.x, 0.25) <= 0 && Double.compare(player.vel.x, -0.25) >= 0) {
+            player.vel.x = 0;
+          }
+        }
+
         boolean surface = player.on_surface(platforms, player.pos);
         if (!surface) {
           if (player.jumps[1] && !player.jumps[0]) {
@@ -195,11 +204,14 @@ public class window {
             player.vel.y += FALL_GRAVITY*2;
             player.vel.y = Math.min(100, player.vel.y);
           }
-        } else if (surface && !player.permeate) {
-          player.jumps = new boolean[]{player.jumps[0], false, true, false };
-          player.ddt = 0;
-          player.vel.x = 0;
-          player.vel.y = 0;
+          player.source_dim.y = 3*64;
+        } else {
+          if (!player.permeate) {
+            player.jumps = new boolean[]{player.jumps[0], false, true, false };
+            player.ddt = 0;
+            player.vel = nn.new Vec2(0, 0);
+            player.dash[0] = false;
+          }
         }
 
         player.move(platforms, TICK_SCALE);
@@ -218,7 +230,7 @@ public class window {
         }
       }
 			this.adjust();
-			try { Thread.sleep(1000/FRAME_PERIOD); } catch (Exception e) {}; 
+			try { Thread.sleep(1000/FRAME_PERIOD); } catch (Exception e) { System.out.println(e); };  
 		}
 	}
 
@@ -231,13 +243,7 @@ public class window {
 		@Override
 		public void paintComponent(Graphics g) {
 			super.paintComponent(g);
-			/* boolean Graphics.drawImage(Image img,
-       int dstx1, int dsty1, int dstx2, int dsty2,
-       int srcx1, int srcy1, int srcx2, int srcy2,
-       ImageObserver observer); */
-
-      g.drawImage(bg, 0, 0, null);
-			p.setBackground(Color.black);
+      p.setBackground(bg);
 
       text FPS = new text("", 15, 30, "0xFFFFFF");
       FPS.update_msg(String.format("FPS: %f", ((double)1e9/(System.nanoTime()-last))));
@@ -248,14 +254,18 @@ public class window {
 			for (platform p : platforms) {
 				p.pos.x += (p.pos.x%50==0?1:0);
         if (p.health > 0 || p.infinite) {
-          p.render(g, width, height);
+          p.render(g);
 				}
 			}
 
       for (bouncer b : bouncers) {
-        b.render(g, width, height);
+        b.render(g);
       }
 
+			/* boolean Graphics.drawImage(Image img,
+       int dstx1, int dsty1, int dstx2, int dsty2,
+       int srcx1, int srcy1, int srcx2, int srcy2,
+       ImageObserver observer); */
       for (int i = 0;  i < players.size(); i++) {
         player x = players.get(i);
         if (x.loaded) {
@@ -275,7 +285,9 @@ public class window {
         if (t.ticks >= t.limit) {
           try {
             i.remove();
-          } catch (Exception e) {}
+          } catch (Exception e) { 
+            System.out.println(e); 
+          }
         } else {
           t.renderText(g);
         }

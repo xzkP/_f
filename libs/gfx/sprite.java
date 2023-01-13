@@ -47,7 +47,7 @@ public class sprite {
 
   public void img_update(double scale) {
 		this.counter = (counter+1)%((int)(60*scale));
-		if (this.counter%((int)(4*scale))==0) {
+		if (this.counter%((int)(12*scale))==0) {
 			this.source_dim.x += this.dimensions().x;
 			this.source_dim.x %= (this.width);
 		}

@@ -14,7 +14,8 @@ public class player extends sprite {
   final int DOUBLE_JUMP = 15;
   public int ddt = 0; 
   // jumps[2] = double jump
-  public boolean directions[] = { false, false, false, false }, jumps[] = { true, false, true, false};
+  // dash[2] -> dash, direction
+  public boolean directions[] = { false, false, false, false }, jumps[] = { true, false, true, false}, dash[] = { false, false };
   double crit = 0.0, JUMP_FORCE = 8, DOUBLE_JUMP_FORCE=10;
   neo.Vec2 vel;
   // melee, weapon.
@@ -47,6 +48,7 @@ public class player extends sprite {
           }
         } else {
           if (i%2==i) {
+            this.source_dim.y = 192;
             boolean surface = this.on_surface(platforms, this.pos);
             if (surface && this.jumps[0]) {
               this.vel.y = -this.JUMP_FORCE;
@@ -72,14 +74,17 @@ public class player extends sprite {
             }
           }
         }
-        this.img_update(TICK_SCALE);
       }
+      this.img_update(TICK_SCALE);
     }
   }
 
   public void respawn(double px, double py) {
     this.pos = this.nn.new Vec2(px, py);
     this.vel = this.nn.new Vec2(0, 0);
+    for (weapon w : this.attacks) {
+      w.erase();
+    }
   }
 
   public platform get_surface(ArrayList<platform> platforms) {
@@ -154,7 +159,10 @@ public class player extends sprite {
         this.attacks.get(0).shoot(pos, forward);
         break;
       case (5):
-        this.attacks.get(1).shoot(pos, forward);
+        // dash:
+        this.dash[0] = true;
+        this.dash[1] = this.forward;
+        this.mod_vel((this.dash[1]?1:-1)*10, 0);
         break;
     }
   }

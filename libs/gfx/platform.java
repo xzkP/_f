@@ -7,10 +7,10 @@ import java.util.HashMap;
 /* platforms:
  - size & shape --> probably mostly rectangular 
  - width & height
- */
+*/
 public class platform {
   String title;
-	public boolean infinite = false, collide = true, damageable = false;
+	public boolean infinite = false, collide = true, damageable = false, permeable = true;
   double health = Integer.MAX_VALUE;
   neo nn;
 	neo.Vec2 dimensions, pos;
@@ -33,10 +33,6 @@ public class platform {
 		this.assign_color(c);
     this.title = t;
 	}
-  public boolean visible(neo.Vec2 pos, int scope) {
-    int px = (int) pos.x, py = (int) pos.y;
-    return (this.pos.x > (px/scope)*scope && this.pos.x < (px/scope+1)*scope);
-  }
   public void modify(int w, int h) {
     this.dimensions = this.nn.new Vec2(w,h);
   }
@@ -75,13 +71,13 @@ public class platform {
 	}
   public void render(Graphics g, int width, int height) {
     g.setColor(this.pc);
-    g.fillRect(nn.mod((int) this.pos.x, width), nn.mod((int) this.pos.y, height), (int) this.dimensions.x, (int) this.dimensions.y);
+    g.fillRect((int) this.pos.x, (int) this.pos.y, (int) this.dimensions.x, (int) dimensions.y);
   }
   public boolean under(player main, neo.Vec2 position) {
     neo.Vec2 dim = main.dimensions();
     boolean ret =  (((position.x+dim.x >= this.pos.x && position.x+dim.x <= this.pos.x+this.dimensions.x) || (position.x >= this.pos.x && position.x <= this.pos.x+this.dimensions.x) || this.infinite) && position.y+dim.y >= this.pos.y && position.y+dim.y <= this.pos.y+this.dimensions.y);
     // adjust main so that it lies on the platform.
-    main.mod_pos(0, ret?this.pos.y-(main.pos.y+dim.y):0);
+    main.mod_pos(0, (ret&&!main.permeate)?this.pos.y-(main.pos.y+dim.y):0);
     return ret;
   }
   @Override

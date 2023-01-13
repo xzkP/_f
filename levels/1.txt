@@ -1,7 +1,7 @@
 level: 1
 platforms: {
   {
-    position: [200, 300]
+    position: [1500, 300]
     dimensions: [400, 50]
   }
 }

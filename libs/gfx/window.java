@@ -11,15 +11,16 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import javax.imageio.ImageIO;
+
 
 public class window {
   // all tick rates are based on 60.
 	private final int 
-    FRAME_PERIOD = 120, BULLET_TICKS = 300, BOUNCER_HEIGHT = 5, BOUNCER_WIDTH = 100;
+    FRAME_PERIOD = 120, BULLET_TICKS = 300, BOUNCER_HEIGHT = 5, BOUNCER_WIDTH = 100, DEATH=300;
   private double fps, TICK_SCALE = FRAME_PERIOD/60.0, JUMP_GRAVITY=0.7/TICK_SCALE, FALL_GRAVITY=0.15/TICK_SCALE, LAST=0, JUMP_FORCE=15.0;
   int jf=0, djf=0;
   neo nn = new neo();
-  neo.Vec2 end;
 	JFrame frame;
 	Panel p;
 	InputKey keys;
@@ -29,10 +30,16 @@ public class window {
   ArrayList<player> players = new ArrayList<player>();
 	ArrayList<platform> platforms = new ArrayList<platform>();
   ArrayList<bouncer> bouncers = new ArrayList<bouncer>();
+  ArrayList<text> queue = new ArrayList<text>();
+  Image bg;
 	public window(String w_title, int w, int h) {
-		width = w;
-		height = h;
-		p1 = new player("sprites/animated.bmp", w/2, 0, 4, 4, this.nn);
+		this.width = w;
+		this.height = h;
+    /*
+    try {
+      this.bg = ImageIO.read(new File("./sprites/bg.png"));
+    } catch (Exception e) {}*/
+		p1 = new player("./sprites/animated.bmp", w/2, 0, 4, 4, this.nn);
     p1.movement = new HashMap<Character, Integer>() {{
       put('←', 0);
       put('↑', 1);
@@ -41,7 +48,7 @@ public class window {
       put('Z', 4);
     }};
 
-    p2 = new player("sprites/animated.bmp", w/2, 0, 4, 4, this.nn);
+    p2 = new player("./sprites/animated.bmp", w/2, 0, 4, 4, this.nn);
     p2.movement = new HashMap<Character, Integer>() {{
       put('A', 0);
       put('W', 1);
@@ -67,14 +74,13 @@ public class window {
       public void componentResized(ComponentEvent e) {
         width = frame.getWidth();
         height = frame.getHeight();
-        end = nn.new Vec2(width, height);
       }
     });
 
     this.level("./levels/1.txt");
 
-
     this.ground = new platform(100, 800, width-200, 100, "grey", this.nn);
+    this.ground.permeable = false;
     this.platforms.add(ground);
     this.bouncers.add(new bouncer(ground, BOUNCER_WIDTH, BOUNCER_HEIGHT, this.nn));
 	}
@@ -110,12 +116,6 @@ public class window {
         }
       }
       parse_platform(metadata.get("platforms"));
-      if (metadata.containsKey("end")) {
-        String endl = metadata.get("end").get(0).replace("{","").replace("}","").replace("[","").replace("]","").strip();
-        int px = Integer.parseInt(endl.substring(0, endl.indexOf(",")).strip()), 
-            py = Integer.parseInt(endl.substring(endl.indexOf(",")+1).strip());
-      } 
-      this.end = this.nn.new Vec2(this.width, this.height);
     } catch (Exception e) {
       System.out.println(e);
       System.out.println(String.format("Can't read file: %s", fn));
@@ -172,12 +172,6 @@ public class window {
         } catch (Exception e) {}
       }
     }
-
-    /*
-    for (player player : players) {
-      player.pos.x = this.nn.mod((int) player.pos.x, width);
-      player.pos.y = this.nn.mod((int) player.pos.y, height);
-    }*/
 	}
 
 	public void exec() {
@@ -185,6 +179,10 @@ public class window {
 		while (true) {
 			frame.repaint();
       for (player player : players) {
+        if (player.permeate && !player.collide(player.pt, player.pos)) {
+          player.permeate = false;
+          player.pt = null;
+        }
         player.bounce(bouncers);
         player.jump_tick++;
         player.ddt++;
@@ -197,22 +195,28 @@ public class window {
             player.vel.y += FALL_GRAVITY*2;
             player.vel.y = Math.min(100, player.vel.y);
           }
-        } else {
+        } else if (surface && !player.permeate) {
           player.jumps = new boolean[]{player.jumps[0], false, true, false };
           player.ddt = 0;
           player.vel.x = 0;
           player.vel.y = 0;
         }
 
-        player.move(platforms, this.end, TICK_SCALE);
+        player.move(platforms, TICK_SCALE);
         player.mod_pos(player.vel);
 
         for (weapon w : player.attacks) {
           w.update((int) (BULLET_TICKS*TICK_SCALE));
           w.collide(platforms);
         }
-      }
 
+        neo.Vec2 pos = player.position();
+
+        if (pos.x < -DEATH || pos.x > this.width+DEATH ||
+            pos.y < -DEATH || pos.y > this.height+DEATH) {
+          player.respawn(this.width/2, 0);
+        }
+      }
 			this.adjust();
 			try { Thread.sleep(1000/FRAME_PERIOD); } catch (Exception e) {}; 
 		}
@@ -231,6 +235,8 @@ public class window {
        int dstx1, int dsty1, int dstx2, int dsty2,
        int srcx1, int srcy1, int srcx2, int srcy2,
        ImageObserver observer); */
+
+      g.drawImage(bg, 0, 0, null);
 			p.setBackground(Color.black);
 
       text FPS = new text("", 15, 30, "0xFFFFFF");
@@ -238,19 +244,16 @@ public class window {
       FPS.renderText(g);
       last = System.nanoTime();
 
-
 			// check if platform is in viewing distance + render
 			for (platform p : platforms) {
 				p.pos.x += (p.pos.x%50==0?1:0);
-				if ((p.infinite || p.visible(p1.pos, width)) && p.health > 0) {
+        if (p.health > 0 || p.infinite) {
           p.render(g, width, height);
 				}
 			}
 
       for (bouncer b : bouncers) {
-        if (b.visible(p1.pos, width)) { 
-          b.render(g, width, height);
-        }
+        b.render(g, width, height);
       }
 
       for (int i = 0;  i < players.size(); i++) {
@@ -260,10 +263,21 @@ public class window {
           g.drawImage(x.img, (int) x.pos.x, (int) x.pos.y, (int) (x.pos.x+dim.x), (int) (x.pos.y+dim.y), (int) (x.source_dim.x), (int) (x.source_dim.y), (int) (x.source_dim.x+dim.x), (int) (x.source_dim.y+dim.y), null);
           for (weapon wp : x.attacks) {
             wp.render(g, x.pos, nn.new Vec2(width, height));
-            wp.hit(players, i, g);
+            wp.hit(players, i, g, queue);
           }
         } else {
           System.out.println("Unable to open sprite, not loaded");
+        }
+      }
+      for (Iterator<text> i=queue.iterator(); i.hasNext();) {
+        text t = i.next();
+        t.ticks++;
+        if (t.ticks >= t.limit) {
+          try {
+            i.remove();
+          } catch (Exception e) {}
+        } else {
+          t.renderText(g);
         }
       }
 		}

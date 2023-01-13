@@ -11,6 +11,7 @@ import javax.swing.JFrame;
 import java.awt.Font;
 
 public class text extends JComponent {
+  public int limit = 100, ticks = 0;
   public String message;
   neo.Vec2 position;
   Color c;

@@ -14,7 +14,7 @@ public class text extends JComponent {
   public String message;
   neo.Vec2 position;
   Color c;
-  Font f = new Font("SF Mono", Font.BOLD, 16);
+  Font f = new Font("C&C Red Alert [INET]", Font.PLAIN, 24);
   public text(String msg, int px, int py) {
     neo nn = new neo();
     this.message = msg;

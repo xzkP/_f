@@ -17,10 +17,12 @@ public class player extends sprite {
   public boolean directions[] = { false, false, false, false }, jumps[] = { true, false, true, false};
   double crit = 0.0, JUMP_FORCE = 8, DOUBLE_JUMP_FORCE=10;
   neo.Vec2 vel;
-  ArrayList<weapon> inventory = new ArrayList<weapon>();
+  // melee, weapon.
+  ArrayList<weapon> attacks = new ArrayList<weapon>();
 
   public player(String fn, double px, double py, int w_count, int h_count, neo nn) {
     super(fn, px, py, w_count, h_count, nn);
+    this.attacks.add(new weapon("f", 30, this.nn));
     vel = nn.new Vec2(0, 0);
   }
 
@@ -81,7 +83,8 @@ public class player extends sprite {
     ArrayList<platform> tc = new ArrayList<platform>(bouncers);
     if (this.collide(tc, this.pos, false)) {
       this.vel.y = -10.0;
-      this.jumps[2] = true;
+      this.jumps = new boolean[]{this.jumps[0], true, true, false };
+      this.ddt = 0;
       this.mod_pos(this.vel);
     }
   }
@@ -113,8 +116,10 @@ public class player extends sprite {
   public void action(int index) {
     switch (index) {
       case (4):
-        this.shoot();
+        this.attacks.get(0).shoot(pos, forward);
         break;
+      case (5):
+        this.attacks.get(1).shoot(pos, forward);
     }
   }
 };

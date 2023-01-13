@@ -16,7 +16,6 @@ public class sprite {
 	int width, height, counter = 0, jump_tick = 500; 
   neo nn;
   neo.Vec2 pos, sprite_values, source_dim;
-  weapon equipped;
 
   public sprite(String fn, double px, double py, int w_count, int h_count, neo n) {
 		try {
@@ -53,8 +52,4 @@ public class sprite {
 			this.source_dim.x %= (this.width);
 		}
 	}
-
-  void shoot() {
-    this.equipped.shoot(pos, forward);
-  }
 };

@@ -17,7 +17,7 @@ public class bullet {
     dmg = critical();
   }
   public double critical() {
-    return (Math.random()<=0.15 ? (Math.random()+1)*(1+Math.random())*dmg: dmg); 
+    return (Math.random()<=0.15?(Math.random()+0.5)*(1+Math.random())*dmg : dmg);
   }
   public void update() {
     this.position.x += (forward?1:-1)*7.5;

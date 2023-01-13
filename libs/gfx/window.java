@@ -33,8 +33,6 @@ public class window {
 		width = w;
 		height = h;
 		p1 = new player("sprites/animated.bmp", w/2, 0, 4, 4, this.nn);
-    p1.equipped = new weapon("fists", 30, this.nn);
-    p1.inventory.add(p1.equipped);
     p1.movement = new HashMap<Character, Integer>() {{
       put('←', 0);
       put('↑', 1);
@@ -44,9 +42,6 @@ public class window {
     }};
 
     p2 = new player("sprites/animated.bmp", w/2, 0, 4, 4, this.nn);
-    p2.equipped = new weapon("fists", 30, this.nn);
-    p2.inventory.add(p2.equipped);
-
     p2.movement = new HashMap<Character, Integer>() {{
       put('A', 0);
       put('W', 1);
@@ -178,12 +173,11 @@ public class window {
       }
     }
 
+    /*
     for (player player : players) {
       player.pos.x = this.nn.mod((int) player.pos.x, width);
       player.pos.y = this.nn.mod((int) player.pos.y, height);
-      player.pos.x = this.nn.mod((int) player.pos.x, width);
-      player.pos.y = this.nn.mod((int) player.pos.y, height);
-    }
+    }*/
 	}
 
 	public void exec() {
@@ -197,7 +191,7 @@ public class window {
         player.jumps[0] = (player.jump_tick >= delay*TICK_SCALE);
         boolean surface = player.on_surface(platforms, player.pos);
         if (!surface) {
-          if (player.jumps[1]) {
+          if (player.jumps[1] && !player.jumps[0]) {
             player.vel.y = (-player.JUMP_FORCE+(player.jump_tick)*JUMP_GRAVITY);
           } else {
             player.vel.y += FALL_GRAVITY*2;
@@ -212,10 +206,8 @@ public class window {
 
         player.move(platforms, this.end, TICK_SCALE);
         player.mod_pos(player.vel);
-        
 
-
-        for (weapon w : player.inventory) {
+        for (weapon w : player.attacks) {
           w.update((int) (BULLET_TICKS*TICK_SCALE));
           w.collide(platforms);
         }
@@ -241,14 +233,11 @@ public class window {
        ImageObserver observer); */
 			p.setBackground(Color.black);
 
-      text fps_display = new text("", 15, 30, "0xFFFFFF"), pos_display = new text("", 15, 60, "0xFFFFFF"), velocity = new text("", 15, 90, "0xFFFFFF");
-      pos_display.update_msg(String.format("(%.2f, %.2f)", p1.pos.x, p1.pos.y));
-      fps_display.update_msg(String.format("FPS: %f", ((double) 1e9)/(System.nanoTime()-last)));
-      velocity.update_msg(String.format("(%.2f, %.2f)", p1.vel.x, p1.vel.y));
+      text FPS = new text("", 15, 30, "0xFFFFFF");
+      FPS.update_msg(String.format("FPS: %f", ((double)1e9/(System.nanoTime()-last))));
+      FPS.renderText(g);
       last = System.nanoTime();
-      pos_display.renderText(g);
-      velocity.renderText(g);
-      fps_display.renderText(g);
+
 
 			// check if platform is in viewing distance + render
 			for (platform p : platforms) {
@@ -268,13 +257,10 @@ public class window {
         player x = players.get(i);
         if (x.loaded) {
           neo.Vec2 dim = x.dimensions();
-          g.drawImage(x.img, (int) x.pos.x, (int) x.pos.y,
-              (int) (x.pos.x+dim.x), (int) (x.pos.y+dim.y),
-              (int) (x.source_dim.x), (int) (x.source_dim.y), 
-              (int) (x.source_dim.x+dim.x), (int) (x.source_dim.y+dim.y), null);
-          for (weapon wp : x.inventory) {
+          g.drawImage(x.img, (int) x.pos.x, (int) x.pos.y, (int) (x.pos.x+dim.x), (int) (x.pos.y+dim.y), (int) (x.source_dim.x), (int) (x.source_dim.y), (int) (x.source_dim.x+dim.x), (int) (x.source_dim.y+dim.y), null);
+          for (weapon wp : x.attacks) {
             wp.render(g, x.pos, nn.new Vec2(width, height));
-            wp.hit(players, i);
+            wp.hit(players, i, g);
           }
         } else {
           System.out.println("Unable to open sprite, not loaded");

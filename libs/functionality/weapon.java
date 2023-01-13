@@ -61,7 +61,7 @@ public class weapon {
     }
   }
 
-  public void hit(ArrayList<player> players, int index) {
+  public void hit(ArrayList<player> players, int index, Graphics g)  {
     int count = 0;
     for (Iterator<bullet> i=bullets.iterator(); i.hasNext();) {
       bullet b = i.next();
@@ -74,6 +74,9 @@ public class weapon {
         Shape hitbox = new Rectangle2D.Double(p.position().x, p.position().y, pdim.x, pdim.y);
         if (bullet_bound.intersects((Rectangle2D) hitbox)) {
           try {
+            neo.Vec2 position = p.position();
+            text dmg = new text(String.format("%.2f", b.dmg), (int) position.x, (int) (position.y-p.dimensions().y), "0xFFFFFF");
+            dmg.renderText(g);
             i.remove(); 
             p.mod_vel(b.forward?1:-1*3, -5);
           } catch (Exception e) {}

@@ -9,17 +9,17 @@ import java.awt.image.*;
 import java.awt.*;
 import java.util.HashMap;
 
-public class player extends sprite {
+abstract public class player extends sprite {
   HashMap<Character, Integer> movement;
-  final int DOUBLE_JUMP = 15;
-  public int ddt = 0; 
+  final int DOUBLE_JUMP = 15, ULTABLE = 500;
+  public int ddt = 0, shootable = 0;
   // jumps[2] = double jump
   // dash[2] -> dash, direction
   public boolean directions[] = { false, false, false, false }, jumps[] = { true, false, true, false}, dash[] = { false, false };
   double crit = 0.0, JUMP_FORCE = 8, DOUBLE_JUMP_FORCE=10;
   neo.Vec2 vel;
   // melee, weapon.
-  ArrayList<weapon> attacks = new ArrayList<weapon>();
+  protected ArrayList<weapon> attacks = new ArrayList<weapon>();
 
   boolean permeate = false;
   platform pt;
@@ -152,6 +152,8 @@ public class player extends sprite {
     }
     return false;
   }
+
+  abstract public void ult();
 
   public void action(int index) {
     switch (index) {

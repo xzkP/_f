@@ -24,7 +24,7 @@ public class platform {
       this.tile = ImageIO.read(new File("./sprites/wall.bmp"));
       int tw = tile.getWidth(), th = tile.getHeight();
       this.nn = n;
-      this.dimensions = this.nn.new Vec2((w/tw+1)*tw, (h/th+1)*th);
+      this.dimensions = this.nn.new Vec2(Math.max(1, w/tw)*tw, Math.max(1, h/th)*th);
       this.pos = this.nn.new Vec2(x, y);
       this.tdim = this.nn.new Vec2(tw, th);
     } catch (Exception e) {
@@ -36,7 +36,7 @@ public class platform {
       tile = ImageIO.read(new File("./sprites/wall.bmp"));
       int tw = tile.getWidth(), th = tile.getHeight();
       this.nn = n;
-      this.dimensions = this.nn.new Vec2((w/tw+1)*tw, (h/th+1)*th);
+      this.dimensions = this.nn.new Vec2(Math.max(1, w/tw)*tw, Math.max(1, h/th)*th);
       this.pos = nn.new Vec2(x, y);
       this.assign_color(c);
       this.tdim = this.nn.new Vec2(tw, th);
@@ -49,7 +49,7 @@ public class platform {
       tile = ImageIO.read(new File("./sprites/wall.bmp"));
       int tw = tile.getWidth(), th = tile.getHeight();
       this.nn = n;
-      this.dimensions = this.nn.new Vec2((w/tw+1)*tw, (h/th+1)*th);
+      this.dimensions = this.nn.new Vec2(Math.max(1, w/tw)*tw, Math.max(1, h/th)*th);
       this.pos = nn.new Vec2(x, y);
       this.assign_color(c);
       this.title = t;
@@ -63,7 +63,7 @@ public class platform {
       tile = ImageIO.read(new File(fn));
       int tw = tile.getWidth(), th = tile.getHeight();
       this.nn = n;
-      this.dimensions = this.nn.new Vec2((w/tw+1)*tw, (h/th+1)*th);
+      this.dimensions = this.nn.new Vec2(Math.max(1, w/tw)*tw, Math.max(1, h/th)*th);
       this.pos = nn.new Vec2(x, y);
       this.tdim = this.nn.new Vec2(tw, th);
     } catch (Exception e) {

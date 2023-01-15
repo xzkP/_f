@@ -10,7 +10,7 @@ public class bullet {
   int cticks = 0;
   double dmg;
   boolean shot = false, forward = false;
-  neo.Vec2 position;
+  neo.Vec2 position, velocity;
   public bullet(String fn, double d, int dx, int dy, int cx, int cy, neo nn) {
     img = new sprite(fn, dx, dy, cx, cy, nn);
     dmg = d;

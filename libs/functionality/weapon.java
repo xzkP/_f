@@ -20,6 +20,8 @@ public class weapon {
     this.dmg = damage;
     this.nn = n;
   }
+  public void customize() {
+  }
   public void update(int TICKS) {
     for (Iterator<bullet> i=bullets.iterator(); i.hasNext();) {
       try {
@@ -86,8 +88,14 @@ public class weapon {
     } catch (Exception e) { System.out.println(e); }
   }
   public void shoot(neo.Vec2 p, boolean f) {
-    neo nn = new neo();
-    bullet b = new bullet("sprites/bullet.bmp", dmg, 32, 32, 1, 1, this.nn);
+    bullet b = new bullet("sprites/fireball.bmp", dmg, 32, 32, 1, 1, this.nn);
+    b.shot = true;
+    b.position = nn.new Vec2(p.x, p.y);
+    b.position.x += (f?1:-1)*b.img.dimensions().x;
+    b.forward = f;
+    bullets.add(b);
+  }
+  public void shoot(neo.Vec2 p, boolean f, bullet b) {
     b.shot = true;
     b.position = nn.new Vec2(p.x, p.y);
     b.position.x += (f?1:-1)*b.img.dimensions().x;

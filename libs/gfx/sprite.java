@@ -11,11 +11,11 @@ import java.util.ArrayList;
 
 public class sprite {
   final private int CAPACITY = 5;
-  boolean loaded = true, forward = true;
+  protected boolean loaded = true, forward = true;
 	BufferedImage img;
 	int width, height, counter = 0, jump_tick = 500; 
-  neo nn;
-  neo.Vec2 pos, sprite_values, source_dim;
+  protected neo nn;
+  protected neo.Vec2 pos, sprite_values, source_dim;
 
   public sprite(String fn, double px, double py, int w_count, int h_count, neo n) {
 		try {
@@ -47,7 +47,7 @@ public class sprite {
 
   public void img_update(double scale) {
 		this.counter = (counter+1)%((int)(60*scale));
-		if (this.counter%((int)(12*scale))==0) {
+		if (this.counter%((int)(20*scale))==0) {
 			this.source_dim.x += this.dimensions().x;
 			this.source_dim.x %= (this.width);
 		}

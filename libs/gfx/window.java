@@ -2,6 +2,7 @@ package libs.gfx;
 
 import libs.math.*;
 import libs.functionality.*;
+import libs.characters.*;
 import javax.script.*;
 import java.io.*;
 import libs.gfx.sprite;
@@ -16,7 +17,7 @@ import javax.imageio.ImageIO;
 public class window {
   // all tick rates are based on 60.
 	private final int 
-    FRAME_PERIOD = 120, BULLET_TICKS = 300, BOUNCER_HEIGHT = 5, BOUNCER_WIDTH = 100, DEATH=600;
+    FRAME_PERIOD = 120, BULLET_TICKS = 300, SHOOT_TICK = 35, BOUNCER_HEIGHT = 5, BOUNCER_WIDTH = 100, DEATH=600;
   private double fps, TICK_SCALE = FRAME_PERIOD/60.0, JUMP_GRAVITY=0.7/TICK_SCALE, FALL_GRAVITY=0.15/TICK_SCALE, LAST=0, JUMP_FORCE=15.0;
   int jf=0, djf=0;
   neo nn = new neo();
@@ -30,13 +31,15 @@ public class window {
 	ArrayList<platform> platforms = new ArrayList<platform>();
   ArrayList<bouncer> bouncers = new ArrayList<bouncer>();
   ArrayList<text> queue = new ArrayList<text>();
-  int hex_bg = Integer.valueOf("BC4A3C", 16);
+  //int hex_bg = Integer.valueOf("BC4A3C", 16);
+  int hex_bg = Integer.valueOf("000000", 16);
   Color bg;
 	public window(String w_title, int w, int h) {
     bg = new Color(hex_bg>>16&0xFF, hex_bg>>8&0xFF, hex_bg&0xFF);
 		this.width = w;
 		this.height = h;
- 		p1 = new player("./sprites/spritesheet_f.bmp", w/2, 0, 4, 4, this.nn);
+    p1 = new elf("./sprites/spritesheet_f.bmp", w/2, 0, 4, 4, this.nn);
+    p1.shootable = (int) (SHOOT_TICK*TICK_SCALE);
     p1.movement = new HashMap<Character, Integer>() {{
       put('←', 0);
       put('↑', 1);
@@ -46,7 +49,8 @@ public class window {
       put('M', 5);
     }};
 
-    p2 = new player("./sprites/spritesheet_f.bmp", w/2, 0, 4, 4, this.nn);
+    p2 = new ogre("./sprites/spritesheet_ogre.bmp", w/2, 0, 4, 4, this.nn);
+    p2.shootable = (int) (SHOOT_TICK*TICK_SCALE);
     p2.movement = new HashMap<Character, Integer>() {{
       put('A', 0);
       put('W', 1);
@@ -228,6 +232,7 @@ public class window {
             pos.y < -DEATH || pos.y > this.height+DEATH) {
           player.respawn(this.width/2, 0);
         }
+        player.shootable++;
       }
 			this.adjust();
 			try { Thread.sleep(1000/FRAME_PERIOD); } catch (Exception e) { System.out.println(e); };  
@@ -306,7 +311,19 @@ public class window {
           if (index >= 0 && index <= 3) {
             p.directions[index] = true;
           } else {
-            p.action(index);
+            switch (index) {
+              case (4):
+                if (p.shootable >= SHOOT_TICK) {
+                  p.attacks.get(0).shoot(p.position(), p.forward);
+                  p.shootable = 0;
+                }
+                break;
+              case (5):
+                //p.ult();
+                break;
+              default:
+                break;
+            }
           }
         }
       }

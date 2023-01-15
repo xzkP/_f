@@ -59,7 +59,7 @@ public class weapon {
         neo.Vec2 dim = b.img.dimensions();
         if (b.position.x > lb_x && b.position.x < ub_x) {
           int dpx = ((int)(b.position.x))%((int)(dimensions.x)), dpy = ((int)(b.position.y))%((int)(dimensions.y));
-          g.drawImage(b.img.get_img(), dpx, dpy, dpx+(int)(dim.x), dpy+(int)(dim.y), 0, 0, 32, 32, null);
+          g.drawImage(b.img.get_img(), dpx, dpy, dpx+(int)(dim.x), dpy+(int)(dim.y), 0, 0, (int) b.img.dimensions().x, (int) b.img.dimensions().y, null);
         }
       }
     } catch (Exception e) { System.out.println(e); }

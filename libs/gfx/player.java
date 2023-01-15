@@ -19,14 +19,13 @@ abstract public class player extends sprite {
   double crit = 0.0, JUMP_FORCE = 8, DOUBLE_JUMP_FORCE=10;
   neo.Vec2 vel;
   // melee, weapon.
-  protected ArrayList<weapon> attacks = new ArrayList<weapon>();
-
   boolean permeate = false;
   platform pt;
+  protected ArrayList<weapon> attacks = new ArrayList<weapon>();
 
   public player(String fn, double px, double py, int w_count, int h_count, neo nn) {
     super(fn, px, py, w_count, h_count, nn);
-    this.attacks.add(new weapon("f", 30, this.nn));
+    this.attacks.add(new weapon("fireballs", 30, this.nn));
     vel = nn.new Vec2(0, 0);
   }
 
@@ -155,17 +154,4 @@ abstract public class player extends sprite {
 
   abstract public void ult();
 
-  public void action(int index) {
-    switch (index) {
-      case (4):
-        this.attacks.get(0).shoot(pos, forward);
-        break;
-      case (5):
-        // dash:
-        this.dash[0] = true;
-        this.dash[1] = this.forward;
-        this.mod_vel((this.dash[1]?1:-1)*10, 0);
-        break;
-    }
-  }
 };

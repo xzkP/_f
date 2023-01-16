@@ -31,7 +31,6 @@ public class window {
 	ArrayList<platform> platforms = new ArrayList<platform>();
   ArrayList<bouncer> bouncers = new ArrayList<bouncer>();
   ArrayList<text> queue = new ArrayList<text>();
-  //int hex_bg = Integer.valueOf("BC4A3C", 16);
   int hex_bg = Integer.valueOf("000000", 16);
   Color bg;
 	public window(String w_title, int w, int h) {
@@ -39,6 +38,8 @@ public class window {
 		this.width = w;
 		this.height = h;
     p1 = new elf("./sprites/spritesheet_f.bmp", w/2, 0, 4, 4, this.nn);
+    // bottom left
+    p1.criticalTextInit(100, this.height-100);
     p1.shootable = (int) (SHOOT_TICK*TICK_SCALE);
     p1.movement = new HashMap<Character, Integer>() {{
       put('←', 0);
@@ -51,6 +52,8 @@ public class window {
 
     p2 = new ogre("./sprites/spritesheet_ogre.bmp", w/2, 0, 4, 4, this.nn);
     p2.shootable = (int) (SHOOT_TICK*TICK_SCALE);
+    // bottom right
+    p2.criticalTextInit(this.width-100-3*48, this.height-100);
     p2.movement = new HashMap<Character, Integer>() {{
       put('A', 0);
       put('W', 1);
@@ -118,30 +121,30 @@ public class window {
           metadata.put(key, unreferenced);
         }
       }
-      parse_platform(metadata.get("platforms"));
+      parsePlatform(metadata.get("platforms"));
     } catch (Exception e) {
       System.out.println(e);
       System.out.println(String.format("Can't read file: %s", fn));
     }
   }
 
-  void push_HM(ArrayList<HashMap<String, String>> A, HashMap<String, String> B) {
+  void pushHM(ArrayList<HashMap<String, String>> A, HashMap<String, String> B) {
     HashMap<String, String> tmp = new HashMap<String, String>(B);
     A.add(tmp);
   }
 
-  void parse_platform(ArrayList<String> data) {
+  void parsePlatform(ArrayList<String> data) {
     HashMap<String, String> tmp = new HashMap<String, String>();
     ArrayList<HashMap<String, String>> split = new ArrayList<HashMap<String, String>>();
     for (String dat : data) {
       String key = dat.substring(0, dat.indexOf(":")).strip(), value = dat.substring(dat.indexOf(":")+1).strip();
       if (key.equals("position") && tmp.size() != 0) {
-        push_HM(split, tmp);
+        pushHM(split, tmp);
         tmp.clear();
       }
       tmp.put(key, value);
     }
-    push_HM(split, tmp);
+    pushHM(split, tmp);
 
     for (HashMap<String, String> info : split) {
       if (info.containsKey("position") && info.containsKey("dimensions")) {
@@ -157,7 +160,7 @@ public class window {
         String hex = (info.containsKey("hex")?info.get("hex"):"222222"), title=(info.containsKey("title")?info.get("title"):String.format("P%d", this.platforms.size()));
         // assuming that platform is rectangular (TODO: add other shapes)
         platform p = new platform((int) p_v.x, (int) p_v.y, (int) d_v.x, (int) d_v.y, this.nn);
-        p.assign_color(Integer.parseInt(hex, 16));
+        p.assignColor(Integer.parseInt(hex, 16));
         if (info.containsKey("health")) {
           p.setHealth(Double.parseDouble(info.get("health")));
         }
@@ -183,6 +186,7 @@ public class window {
     int delay = 35;
 		while (true) {
 			frame.repaint();
+      frame.getContentPane().setBackground(Color.YELLOW);
       for (player player : players) {
         if (player.permeate && !player.collide(player.pt, player.pos)) {
           player.permeate = false;
@@ -200,7 +204,7 @@ public class window {
           }
         }
 
-        boolean surface = player.on_surface(platforms, player.pos);
+        boolean surface = player.onSurface(platforms, player.pos);
         if (!surface) {
           if (player.jumps[1] && !player.jumps[0]) {
             player.vel.y = (-player.JUMP_FORCE+(player.jump_tick)*JUMP_GRAVITY);
@@ -219,7 +223,7 @@ public class window {
         }
 
         player.move(platforms, TICK_SCALE);
-        player.mod_pos(player.vel);
+        player.modPos(player.vel);
 
         for (weapon w : player.attacks) {
           w.update((int) (BULLET_TICKS*TICK_SCALE));
@@ -251,7 +255,7 @@ public class window {
       p.setBackground(bg);
 
       text FPS = new text("", 15, 30, "0xFFFFFF");
-      FPS.update_msg(String.format("FPS: %f", ((double)1e9/(System.nanoTime()-last))));
+      FPS.updateMsg(String.format("FPS: %f", ((double)1e9/(System.nanoTime()-last))));
       FPS.renderText(g);
       last = System.nanoTime();
 
@@ -273,6 +277,7 @@ public class window {
        ImageObserver observer); */
       for (int i = 0;  i < players.size(); i++) {
         player x = players.get(i);
+        x.criticalText.renderText(g);
         if (x.loaded) {
           neo.Vec2 dim = x.dimensions();
           g.drawImage(x.img, (int) x.pos.x, (int) x.pos.y, (int) (x.pos.x+dim.x), (int) (x.pos.y+dim.y), (int) (x.source_dim.x), (int) (x.source_dim.y), (int) (x.source_dim.x+dim.x), (int) (x.source_dim.y+dim.y), null);
@@ -287,7 +292,7 @@ public class window {
       for (Iterator<text> i=queue.iterator(); i.hasNext();) {
         text t = i.next();
         t.ticks++;
-        if (t.ticks >= t.limit) {
+        if (t.hasLimit && t.ticks >= t.limit) {
           try {
             i.remove();
           } catch (Exception e) { 

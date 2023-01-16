@@ -21,13 +21,13 @@ public class bullet {
   }
   public void update() {
     this.position.x += (forward?1:-1)*7.5;
-    this.img.img_update(2);
+    this.img.imgUpdate(2);
     cticks++;
   }
   public String toString() {
     return String.format("BULLET (%f, %f): %f", position.x, position.y, dmg);
   }
-  public double get_dmg() {
+  public double getDmg() {
     return dmg;
   }
 };

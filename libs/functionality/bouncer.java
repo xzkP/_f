@@ -12,6 +12,6 @@ public class bouncer extends platform {
     super(x, y, 100, 10, "white", nn);
   }
   public bouncer(platform p, int w, int h, neo nn) {
-    super((int) (p.get_pos().x+p.get_dimensions().x/2)-w/2, (int) p.get_pos().y-(h/2), w, h, "white", nn);
+    super((int) (p.getPos().x+p.getDimensions().x/2)-w/2, (int) p.getPos().y-(h/2), w, h, "white", nn);
   }
 };

@@ -8,25 +8,31 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.*;
 import java.awt.*;
 import java.util.HashMap;
+import java.util.Iterator;
 
 abstract public class player extends sprite {
   HashMap<Character, Integer> movement;
   final int DOUBLE_JUMP = 15, ULTABLE = 500;
+  protected ArrayList<weapon> attacks = new ArrayList<weapon>();
   public int ddt = 0, shootable = 0;
   // jumps[2] = double jump
   // dash[2] -> dash, direction
   public boolean directions[] = { false, false, false, false }, jumps[] = { true, false, true, false}, dash[] = { false, false };
-  double crit = 0.0, JUMP_FORCE = 8, DOUBLE_JUMP_FORCE=10;
+  public text criticalText;
+  double crit = 0.0, JUMP_FORCE = 8, DOUBLE_JUMP_FORCE=15;
   neo.Vec2 vel;
   // melee, weapon.
   boolean permeate = false;
   platform pt;
-  protected ArrayList<weapon> attacks = new ArrayList<weapon>();
 
   public player(String fn, double px, double py, int w_count, int h_count, neo nn) {
     super(fn, px, py, w_count, h_count, nn);
     this.attacks.add(new weapon("fireballs", 30, this.nn));
     vel = nn.new Vec2(0, 0);
+  }
+
+  public void criticalTextInit(int x, int y) {
+    this.criticalText = new text("0.00", x, y, "0xFFFFFF", 48);
   }
 
   void move(ArrayList<platform> platforms, double TICK_SCALE) {
@@ -43,12 +49,12 @@ abstract public class player extends sprite {
           this.source_dim.y = (dim.x*(1+(i>0?0:1)));
           move_vector = nn.new Vec2((i-(i%2)>0)?1:-1, 0).scale(movement_scalar);
           if (!this.collide(platforms, this.pos.add(move_vector), true)) {
-            this.mod_pos(move_vector);
+            this.modPos(move_vector);
           }
         } else {
           if (i%2==i) {
             this.source_dim.y = 192;
-            boolean surface = this.on_surface(platforms, this.pos);
+            boolean surface = this.onSurface(platforms, this.pos);
             if (surface && this.jumps[0]) {
               this.vel.y = -this.JUMP_FORCE;
               this.jump_tick = 0;
@@ -60,21 +66,21 @@ abstract public class player extends sprite {
               this.jumps = new boolean[]{this.jumps[0], true, false, true};
             }
           } else {
-            boolean surface = this.on_surface(platforms, this.pos);
+            boolean surface = this.onSurface(platforms, this.pos);
             if (!surface && (this.jumps[0] || this.jumps[1])) {
               this.vel.y += 0.35;
             } else {
-              platform g = get_surface(platforms);
+              platform g = getSurface(platforms);
               if (g.permeable) {
                 this.permeate = true;
                 this.pt = g;
-                this.mod_vel(0, 0.375);
+                this.modVel(0, 0.375);
               }
             }
           }
         }
       }
-      this.img_update(TICK_SCALE);
+      this.imgUpdate(TICK_SCALE);
     }
   }
 
@@ -84,31 +90,32 @@ abstract public class player extends sprite {
     for (weapon w : this.attacks) {
       w.erase();
     }
+    this.crit = 0;
   }
 
-  public platform get_surface(ArrayList<platform> platforms) {
+  public platform getSurface(ArrayList<platform> platforms) {
     for (platform p : platforms) {
       if (p.under(this, this.pos)) return p;
     }
     return null;
   }
 
-  public void mod_pos(double x, double y) {
+  public void modPos(double x, double y) {
     this.pos = this.pos.add(x,y);
   }
 
-  public void mod_pos(neo.Vec2 v) {
+  public void modPos(neo.Vec2 v) {
     this.pos = this.pos.add(v);
   }
 
-  public void mod_vel(double x, double y) {
+  public void modVel(double x, double y) {
     this.vel = this.vel.add(x,y);
-    this.mod_pos(this.vel);
+    this.modPos(this.vel);
   }
 
-  public void mod_vel(neo.Vec2 v) {
+  public void modVel(neo.Vec2 v) {
     this.vel = this.vel.add(v);
-    this.mod_pos(this.vel);
+    this.modPos(this.vel);
   }
 
   public void bounce(ArrayList<bouncer> bouncers) {
@@ -117,12 +124,12 @@ abstract public class player extends sprite {
       this.vel.y = (Math.abs(this.vel.y)*-0.25)-10.0;
       this.jumps = new boolean[]{this.jumps[0], true, true, false };
       this.ddt = 0;
-      this.mod_pos(this.vel);
+      this.modPos(this.vel);
     }
   }
 
   // check horizontal collision with all objects
-  boolean on_surface(ArrayList<platform> platforms, neo.Vec2 position) {
+  boolean onSurface(ArrayList<platform> platforms, neo.Vec2 position) {
     for (platform p : platforms) {
       if (p.under(this, position)) {
         return true;
@@ -152,6 +159,10 @@ abstract public class player extends sprite {
     return false;
   }
 
-  abstract public void ult();
+  public void updateCritical() {
+    this.criticalText.updateMsg(String.format("%.2f", this.crit));
+  }
 
+
+  abstract public void ult();
 };

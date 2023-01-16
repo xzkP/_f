@@ -13,31 +13,38 @@ import java.awt.Font;
 public class text extends JComponent {
   public int limit = 100, ticks = 0;
   public String message;
+  public boolean hasLimit = true;
+  neo nn = new neo();
   neo.Vec2 position;
   Color c;
   Font f = new Font("04b03", Font.PLAIN, 24);
   public text(String msg, int px, int py) {
-    neo nn = new neo();
     this.message = msg;
     this.position = nn.new Vec2(px, py);
-    this.assign_color("0xFFFFFF");
+    this.assignColor("0xFFFFFF");
   }
   public text(String msg, int px, int py, String color) {
-    neo nn = new neo();
     this.message = msg;
     this.position = nn.new Vec2(px, py);
-    this.assign_color(color);
+    this.assignColor(color);
+  }
+  public text(String msg, int px, int py, String color, int fontSize) {
+    this.message = msg;
+    this.position = nn.new Vec2(px, py);
+    this.assignColor(color);
+    this.f = new Font("04b03", Font.PLAIN, fontSize);
   }
 
-  public void update_msg(String new_msg) {
+  public void updateMsg(String new_msg) {
     this.message = new_msg;
   }
 
-  void assign_color(String hex) {
+  void assignColor(String hex) {
     int H = Integer.decode(hex);
-    this.assign_color(H);
+    this.assignColor(H);
   }
-  void assign_color(int H) {
+
+  void assignColor(int H) {
     c = new Color(H>>16&0xFF, H>>8&0xFF, H&0xFF);
   }
 

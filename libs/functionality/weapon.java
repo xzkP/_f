@@ -20,8 +20,6 @@ public class weapon {
     this.dmg = damage;
     this.nn = n;
   }
-  public void customize() {
-  }
   public void update(int TICKS) {
     for (Iterator<bullet> i=bullets.iterator(); i.hasNext();) {
       try {
@@ -38,8 +36,8 @@ public class weapon {
       Shape boundary = new Rectangle2D.Double(b.position.x, b.position.y, bdim.x, bdim.y);
       for (platform p : platforms) {
         if (p.collide) {
-          neo.Vec2 pdim = p.get_dimensions();
-          Shape pb = new Rectangle2D.Double(p.get_pos().x, p.get_pos().y, pdim.x, pdim.y);
+          neo.Vec2 pdim = p.getDimensions();
+          Shape pb = new Rectangle2D.Double(p.getPos().x, p.getPos().y, pdim.x, pdim.y);
           if (boundary.intersects((Rectangle2D) pb)) {
             try { 
               p.shoot(b);
@@ -59,7 +57,7 @@ public class weapon {
         neo.Vec2 dim = b.img.dimensions();
         if (b.position.x > lb_x && b.position.x < ub_x) {
           int dpx = ((int)(b.position.x))%((int)(dimensions.x)), dpy = ((int)(b.position.y))%((int)(dimensions.y));
-          g.drawImage(b.img.get_img(), dpx, dpy, dpx+(int)(dim.x), dpy+(int)(dim.y), 0, 0, (int) b.img.dimensions().x, (int) b.img.dimensions().y, null);
+          g.drawImage(b.img.getImg(), dpx, dpy, dpx+(int)(dim.x), dpy+(int)(dim.y), 0, 0, (int) b.img.dimensions().x, (int) b.img.dimensions().y, null);
         }
       }
     } catch (Exception e) { System.out.println(e); }
@@ -80,7 +78,8 @@ public class weapon {
             neo.Vec2 position = p.position();
             text dmg = new text(String.format("%.2f", b.dmg), (int) position.x, (int) (position.y-p.dimensions().y), "0xFFFFFF");
             q.add(dmg);
-            p.mod_vel(b.forward?1:-1*3, -5);
+            p.modVel(b.forward?1:-1*3, -5);
+            p.updateCritical();
             i.remove(); 
           }
         }

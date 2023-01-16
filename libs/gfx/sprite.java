@@ -41,11 +41,11 @@ public class sprite {
 		return this.nn.new Vec2(this.width/this.sprite_values.x, this.height/this.sprite_values.y);
 	}
 
-  public BufferedImage get_img() {
+  public BufferedImage getImg() {
     return this.img;
   }
 
-  public void img_update(double scale) {
+  public void imgUpdate(double scale) {
 		this.counter = (counter+1)%((int)(60*scale));
 		if (this.counter%((int)(20*scale))==0) {
 			this.source_dim.x += this.dimensions().x;

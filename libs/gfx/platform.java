@@ -38,7 +38,7 @@ public class platform {
       this.nn = n;
       this.dimensions = this.nn.new Vec2(Math.max(1, w/tw)*tw, Math.max(1, h/th)*th);
       this.pos = nn.new Vec2(x, y);
-      this.assign_color(c);
+      this.assignColor(c);
       this.tdim = this.nn.new Vec2(tw, th);
     } catch (Exception e) {
       this.loaded = false;
@@ -51,7 +51,7 @@ public class platform {
       this.nn = n;
       this.dimensions = this.nn.new Vec2(Math.max(1, w/tw)*tw, Math.max(1, h/th)*th);
       this.pos = nn.new Vec2(x, y);
-      this.assign_color(c);
+      this.assignColor(c);
       this.title = t;
       this.tdim = this.nn.new Vec2(tw, th);
     } catch (Exception e) {
@@ -78,9 +78,9 @@ public class platform {
     this.damageable = true;
   }
   public void shoot(bullet bb) {
-    if (damageable) this.health -= bb.get_dmg();
+    if (damageable) this.health -= bb.getDmg();
   }
-	public void assign_color(String cname) {
+	public void assignColor(String cname) {
 		HashMap<String, String> colors = new HashMap<String, String>() {{
 			put("black", "000000");
 			put("white", "FFFFFF");
@@ -91,19 +91,19 @@ public class platform {
 			put("cyan", "00FFFF");
 		}};
 		int color = Integer.parseInt((colors.containsKey(cname.toLowerCase()) ? colors.get(cname.toLowerCase()) : colors.get("grey")), 16);
-    this.assign_color(color);
+    this.assignColor(color);
 	}
-  public neo.Vec2 get_pos() {
+  public neo.Vec2 getPos() {
     return nn.new Vec2(pos.x, pos.y);
   }
-  public neo.Vec2 get_dimensions() {
+  public neo.Vec2 getDimensions() {
     return nn.new Vec2(dimensions.x, dimensions.y);
   }
-  public void assign_color(int H) {
+  public void assignColor(int H) {
     pc = new Color(H>>16&0xFF, H>>8&0xFF, H&0xFF, 255);
   }
 	// hex codes 0xRRGGBB + 0xAA (alpha --> should be defaulted at 255)
-	public void assign_color(int R, int G, int B, int A) {
+	public void assignColor(int R, int G, int B, int A) {
 		pc = new Color(R, G, B, A);
 	}
   public void render(Graphics g) {
@@ -118,11 +118,11 @@ public class platform {
     neo.Vec2 dim = main.dimensions();
     boolean ret =  (((position.x+dim.x >= this.pos.x && position.x+dim.x <= this.pos.x+this.dimensions.x) || (position.x >= this.pos.x && position.x <= this.pos.x+this.dimensions.x) || this.infinite) && position.y+dim.y >= this.pos.y && position.y+dim.y <= this.pos.y+this.dimensions.y);
     // adjust main so that it lies on the platform.
-    main.mod_pos(0, (ret&&!main.permeate)?this.pos.y-(main.pos.y+dim.y):0);
+    main.modPos(0, (ret&&!main.permeate)?this.pos.y-(main.pos.y+dim.y):0);
     return ret;
   }
   @Override
   public String toString() {
-    return String.format("(%.2f, %.2f)", this.get_pos().x, this.get_pos().y);
+    return String.format("(%.2f, %.2f)", this.getPos().x, this.getPos().y);
   }
 };

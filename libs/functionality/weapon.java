@@ -78,8 +78,8 @@ public class weapon {
             neo.Vec2 position = p.position();
             text dmg = new text(String.format("%.2f", b.dmg), (int) position.x, (int) (position.y-p.dimensions().y), "0xFFFFFF");
             q.add(dmg);
-            p.modVel(b.forward?1:-1*3, -5);
-            p.updateCritical();
+            //p.modVel(b.forward?1:-1*3, -5);
+            p.updateCritical((b.dmg/b.baseDmg)*Math.random()*10+5, b.forward);
             i.remove(); 
           }
         }

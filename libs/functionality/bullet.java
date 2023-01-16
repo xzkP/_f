@@ -8,16 +8,16 @@ import java.io.*;
 public class bullet {
   public static sprite img;
   int cticks = 0;
-  double dmg;
+  double dmg, baseDmg;
   boolean shot = false, forward = false;
   neo.Vec2 position, velocity;
   public bullet(String fn, double d, int dx, int dy, int cx, int cy, neo nn) {
     img = new sprite(fn, dx, dy, cx, cy, nn);
-    dmg = d;
+    baseDmg = d;;
     dmg = critical();
   }
   public double critical() {
-    return (Math.random()<=0.15?(Math.random()+0.5)*(1+Math.random())*dmg : dmg);
+    return (Math.random()<=0.15?(Math.random()+0.5)*(1+Math.random())*baseDmg: baseDmg);
   }
   public void update() {
     this.position.x += (forward?1:-1)*7.5;

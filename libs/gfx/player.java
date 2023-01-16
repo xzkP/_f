@@ -32,7 +32,7 @@ abstract public class player extends sprite {
   }
 
   public void criticalTextInit(int x, int y) {
-    this.criticalText = new text("0.00", x, y, "0xFFFFFF", 48);
+    this.criticalText = new text("0.00%", x, y, "0xFFFFFF", 48);
   }
 
   void move(ArrayList<platform> platforms, double TICK_SCALE) {
@@ -159,8 +159,13 @@ abstract public class player extends sprite {
     return false;
   }
 
-  public void updateCritical() {
-    this.criticalText.updateMsg(String.format("%.2f", this.crit));
+  public void updateCritical(double critPercent, boolean forward) {
+    this.crit += critPercent;
+    this.criticalText.updateMsg(String.format("%.2f", this.crit)+"%");
+    // knockback based on critical
+    boolean critical = Double.compare(Math.random()*Math.random(), (1-this.crit/100)) >= 0;
+    double scalar = (critical?Math.random()*1.5+1:1);
+    this.modVel((forward?1:-1)*3*scalar, -5*scalar);
   }
 
 

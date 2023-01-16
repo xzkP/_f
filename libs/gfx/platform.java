@@ -58,7 +58,7 @@ public class platform {
       this.loaded = false;
     }
 	}
-  public platform(int x, int y, int w, int h, neo n, String fn) {
+  public platform(int x, int y, int w, int h, String c, neo n, String fn) {
     try {
       tile = ImageIO.read(new File(fn));
       int tw = tile.getWidth(), th = tile.getHeight();
@@ -66,6 +66,7 @@ public class platform {
       this.dimensions = this.nn.new Vec2(Math.max(1, w/tw)*tw, Math.max(1, h/th)*th);
       this.pos = nn.new Vec2(x, y);
       this.tdim = this.nn.new Vec2(tw, th);
+      this.assignColor(c);
     } catch (Exception e) {
       this.loaded = false;
     }

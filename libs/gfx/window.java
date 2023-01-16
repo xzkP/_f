@@ -17,7 +17,7 @@ import javax.imageio.ImageIO;
 public class window {
   // all tick rates are based on 60.
 	private final int 
-    FRAME_PERIOD = 120, BULLET_TICKS = 300, SHOOT_TICK = 35, BOUNCER_HEIGHT = 5, BOUNCER_WIDTH = 100, DEATH=600;
+    FRAME_PERIOD = 120, BULLET_TICKS = 300, SHOOT_TICK = 35, BOUNCER_HEIGHT = 5, DEATH=600;
   private double fps, TICK_SCALE = FRAME_PERIOD/60.0, JUMP_GRAVITY=0.7/TICK_SCALE, FALL_GRAVITY=0.15/TICK_SCALE, LAST=0, JUMP_FORCE=15.0;
   int jf=0, djf=0;
   neo nn = new neo();
@@ -88,7 +88,7 @@ public class window {
     this.ground = new platform(100, 800, width-200, 100, "grey", this.nn);
     this.ground.permeable = false;
     this.platforms.add(ground);
-    this.bouncers.add(new bouncer(ground, BOUNCER_WIDTH, BOUNCER_HEIGHT, this.nn));
+    this.bouncers.add(new bouncer(ground, 64, 64, this.nn));
 	}
 
   void level(String fn) {

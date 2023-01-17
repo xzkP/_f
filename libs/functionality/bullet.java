@@ -10,7 +10,8 @@ public class bullet {
   int survivalTicks = 0;
   double dmg, baseDmg;
   boolean shot = false, forward = false, hasGravity = false;
-  neo.Vec2 position, velocity, gravity = null;
+	public boolean collide = true;
+  neo.Vec2 position = null, velocity = null, gravity = null;
   public neo.Vec2 knockback;
   public bullet(String fn, double d, int dx, int dy, int cx, int cy, boolean f, neo nn) {
     this.img = new sprite(fn, dx, dy, cx, cy, nn);
@@ -65,4 +66,7 @@ public class bullet {
   public boolean isForward() {
     return this.forward;
   }
+	public boolean canCollide() {
+		return this.collide;
+	}
 };

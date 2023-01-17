@@ -15,11 +15,10 @@ import java.util.Iterator;
 import javax.imageio.ImageIO;
 
 public class window {
-  // defining constants
-  private final int
-    FRAME_PERIOD = 120, BULLET_TICKS = 300, SHOOT_TICK = 35, BOUNCER_HEIGHT = 5, DEATH=600;
-  private double fps, TICK_SCALE = FRAME_PERIOD/60.0, JUMP_GRAVITY=0.7/TICK_SCALE, FALL_GRAVITY=0.15/TICK_SCALE, LAST=0, JUMP_FORCE=15.0;
-  int jf=0, djf=0;
+	// constants
+	private final int FRAMES = 120, BULLET_SPAN = 300, SHOOT_DELAY = 20, DEATH_RANGE = 600;
+	private double
+		FPS, FRAME_SCALING = FRAMES/60.0, GRAVITY = 0.15/FRAME_SCALING, JUMPING_GRAVITY = 0.7/FRAME_SCALING, JUMP_VELOCITY = 15.0;
   neo nn = new neo();
   JFrame frame;
   Panel p;
@@ -30,7 +29,7 @@ public class window {
   ArrayList<player> players = new ArrayList<player>();
   ArrayList<platform> platforms = new ArrayList<platform>();
   ArrayList<bouncer> bouncers = new ArrayList<bouncer>();
-  ArrayList<text> queue = new ArrayList<text>();
+  ArrayList<text> textQueue = new ArrayList<text>();
   int hex_bg = Integer.valueOf("000000", 16);
   Color bg;
   public window(String w_title, int w, int h) {
@@ -40,7 +39,7 @@ public class window {
     p1 = new elf("./sprites/spritesheet_f.bmp", w/2, 0, 4, 4, this.nn);
     // bottom left
     p1.criticalTextInit(100, this.height-100);
-    p1.shootable = (int) Math.round(SHOOT_TICK*TICK_SCALE);
+    p1.shootable = (int) (SHOOT_DELAY*FRAME_SCALING);
     p1.movement = new HashMap<Character, Integer>() {{
       put('←', 0);
       put('↑', 1);
@@ -51,7 +50,7 @@ public class window {
     }};
 
     p2 = new ogre("./sprites/spritesheet_ogre.bmp", w/2, 0, 4, 4, this.nn);
-    p2.shootable = (int) Math.round(SHOOT_TICK*TICK_SCALE);
+    p2.shootable = (int) (SHOOT_DELAY*FRAME_SCALING);
     // bottom right
     p2.criticalTextInit(this.width-100-3*48, this.height-100);
     p2.movement = new HashMap<Character, Integer>() {{
@@ -62,7 +61,6 @@ public class window {
       put('T', 4);
       put('Y', 5);
     }};
-
 
     players.add(p1);
     players.add(p2);
@@ -91,6 +89,7 @@ public class window {
     this.bouncers.add(new bouncer(ground, 64, 28, this.nn));
   }
 
+	// read in platforms from file --> fn is filename
   void level(String fn) {
     try (BufferedReader f = new BufferedReader(new FileReader(fn))) {
       boolean additional = false;
@@ -159,7 +158,7 @@ public class window {
         d_v = this.nn.new Vec2(Integer.parseInt(d1), Integer.parseInt(d2));
         String hex = (info.containsKey("hex")?info.get("hex"):"222222"), title=(info.containsKey("title")?info.get("title"):String.format("P%d", this.platforms.size()));
         // assuming that platform is rectangular (TODO: add other shapes)
-        platform p = new platform((int) Math.round(p_v.x), (int) Math.round(p_v.y), (int) Math.round(d_v.x), (int) Math.round(d_v.y), this.nn);
+        platform p = new platform((int) (p_v.x), (int) (p_v.y), (int) (d_v.x), (int) (d_v.y), this.nn);
         p.assignColor(Integer.parseInt(hex, 16));
         if (info.containsKey("health")) {
           p.setHealth(Double.parseDouble(info.get("health")));
@@ -169,7 +168,7 @@ public class window {
     }
   }
 
-  public void adjust() {
+  public void updateObjects() {
     for (Iterator<platform> p=platforms.iterator(); p.hasNext();) {
       platform pp = p.next();
       if (pp.health <= 0) {
@@ -194,7 +193,7 @@ public class window {
         player.bounce(bouncers);
         player.jump_tick++;
         player.ddt++;
-        player.jumps[0] = (player.jump_tick >= delay*TICK_SCALE);
+        player.jumps[0] = (player.jump_tick >= delay*FRAME_SCALING);
 
 
         if (player.dash[0]) {
@@ -207,9 +206,9 @@ public class window {
         boolean surface = player.onSurface(platforms, player.pos);
         if (!surface) {
           if (player.jumps[1] && !player.jumps[0]) {
-            player.vel.y = (-player.JUMP_FORCE+(player.jump_tick)*JUMP_GRAVITY);
+            player.vel.y = (-player.JUMP_VELOCITY+(player.jump_tick)*JUMPING_GRAVITY);
           } else {
-            player.vel.y += FALL_GRAVITY*2;
+            player.vel.y += GRAVITY*2;
             player.vel.y = Math.min(100, player.vel.y);
           }
           player.source_dim.y = 3*64;
@@ -222,24 +221,24 @@ public class window {
           }
         }
 
-        player.move(platforms, TICK_SCALE);
+        player.move(platforms, FRAME_SCALING);
         player.modPos(player.vel);
 
         for (weapon w : player.attacks) {
-          w.updateBullets((int) Math.round(BULLET_TICKS*TICK_SCALE));
+          w.updateBullets((int) (BULLET_SPAN*FRAME_SCALING));
           w.collide(platforms);
         }
 
         neo.Vec2 pos = player.position();
 
-        if (pos.x < -DEATH || pos.x > this.width+DEATH ||
-            pos.y < -DEATH || pos.y > this.height+DEATH) {
+        if (pos.x < -DEATH_RANGE || pos.x > this.width+DEATH_RANGE ||
+            pos.y < -DEATH_RANGE || pos.y > this.height+DEATH_RANGE) {
           player.respawn(this.width/2, 0);
         }
         player.shootable++;
       }
-      this.adjust();
-      try { Thread.sleep(1000/FRAME_PERIOD); } catch (Exception e) { System.out.println(e); };
+      this.updateObjects();
+      try { Thread.sleep(1000/FRAMES); } catch (Exception e) { System.out.println(e); };
     }
   }
 
@@ -255,7 +254,7 @@ public class window {
       p.setBackground(bg);
 
       text FPS = new text("", 15, 30, "0xFFFFFF");
-      FPS.updateMsg(String.format("FPS: %f", ((double)1e9/(System.nanoTime()-last))));
+      FPS.updateMsg(String.format("FPS: %.2f", ((double)1e9/(System.nanoTime()-last))));
       FPS.renderText(g);
       last = System.nanoTime();
 
@@ -280,16 +279,16 @@ public class window {
         x.criticalText.renderText(g);
         if (x.loaded) {
           neo.Vec2 dim = x.dimensions();
-          g.drawImage(x.img, (int) Math.round(x.pos.x), (int) Math.round(x.pos.y), (int) Math.round(x.pos.x+dim.x), (int) Math.round(x.pos.y+dim.y), (int) Math.round(x.source_dim.x), (int) Math.round(x.source_dim.y), (int) Math.round(x.source_dim.x+dim.x), (int) Math.round(x.source_dim.y+dim.y), null);
+          g.drawImage(x.img, (int) (x.pos.x), (int) (x.pos.y), (int) (x.pos.x+dim.x), (int) (x.pos.y+dim.y), (int) (x.source_dim.x), (int) (x.source_dim.y), (int) (x.source_dim.x+dim.x), (int) (x.source_dim.y+dim.y), null);
           for (weapon wp : x.attacks) {
             wp.render(g, x.pos, nn.new Vec2(width, height));
-            wp.hit(players, i, g, queue);
+            wp.hit(players, i, textQueue);
           }
         } else {
           System.out.println("Unable to open sprite, not loaded");
         }
       }
-      for (Iterator<text> i=queue.iterator(); i.hasNext();) {
+      for (Iterator<text> i=textQueue.iterator(); i.hasNext();) {
         text t = i.next();
         t.ticks++;
         if (t.hasLimit && t.ticks >= t.limit) {
@@ -318,7 +317,7 @@ public class window {
           } else {
             switch (index) {
               case (4):
-                if (p.shootable >= SHOOT_TICK) {
+                if (p.shootable >= SHOOT_DELAY*FRAME_SCALING) {
                   p.attacks.get(0).shoot(p.position(), p.forward);
                   p.shootable = 0;
                 }

@@ -78,9 +78,9 @@ public class platform {
     this.health = h;
     this.damageable = true;
   }
-  public void shoot(bullet bb) {
-    if (damageable) this.health -= bb.getDmg();
-  }
+	public void shot(double dmg) {
+		if (damageable) this.health -= dmg;
+	}
 	public void assignColor(String cname) {
 		HashMap<String, String> colors = new HashMap<String, String>() {{
 			put("black", "000000");
@@ -110,7 +110,7 @@ public class platform {
   public void render(Graphics g) {
     for (int x = 0; x < this.dimensions.x/tile_dimensions.x; x++) {
       for (int y = 0; y < this.dimensions.y/tile_dimensions.y; y++) {
-        g.drawImage(this.tile, (int) Math.round(x*tile_dimensions.x+this.pos.x), (int) Math.round(y*tile_dimensions.y+this.pos.y), null);
+        g.drawImage(this.tile, (int) (x*tile_dimensions.x+this.pos.x), (int) (y*tile_dimensions.y+this.pos.y), null);
       }
     }
 

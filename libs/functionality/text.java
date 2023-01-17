@@ -52,7 +52,7 @@ public class text extends JComponent {
     this.setOpaque(false);
     g.setFont(f);
     g.setColor(this.c);
-    g.drawString(this.message, (int) Math.round(this.position.x), (int) Math.round(this.position.y));
+    g.drawString(this.message, (int) (this.position.x), (int) (this.position.y));
   }
 };
 

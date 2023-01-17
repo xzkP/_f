@@ -12,6 +12,6 @@ public class bouncer extends platform {
     super(x, y, 100, 10, "white", nn, "./sprites/trampoline.bmp");
   }
   public bouncer(platform p, int w, int h, neo nn) {
-    super((int) Math.round(p.getPos().x+p.getDimensions().x/2-w), (int) Math.round(p.getPos().y-h), w, h, "white", nn, "./sprites/trampoline.bmp");
+    super((int) (p.getPos().x+p.getDimensions().x/2-w), (int) (p.getPos().y-h), w, h, "white", nn, "./sprites/trampoline.bmp");
   }
 };

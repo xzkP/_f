@@ -13,7 +13,7 @@ public class sprite {
   final private int CAPACITY = 5;
   protected boolean loaded = true, forward = true;
 	BufferedImage img;
-	int width, height, counter = 0, jump_tick = 500; 
+	int width, height, counter = 0, jump_tick = 500;
   protected neo nn;
   protected neo.Vec2 pos, sprite_values, source_dim;
 
@@ -46,8 +46,8 @@ public class sprite {
   }
 
   public void imgUpdate(double scale) {
-    this.counter = (counter+1)%((int) Math.round(60*scale));
-    if (this.counter%((int) Math.round(20*scale))==0) {
+    this.counter = (counter+1)%((int) (60*scale));
+    if (this.counter%((int) (20*scale))==0) {
 			this.source_dim.x += this.dimensions().x;
 			this.source_dim.x %= (this.width);
 		}

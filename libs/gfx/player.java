@@ -19,7 +19,7 @@ abstract public class player extends sprite {
   // dash[2] -> dash, direction
   public boolean directions[] = { false, false, false, false }, jumps[] = { true, false, true, false}, dash[] = { false, false };
   public text criticalText;
-  double crit = 0.0, JUMP_FORCE = 8, DOUBLE_JUMP_FORCE=15;
+  double crit = 0.0, JUMP_VELOCITY = 8, DOUBLE_JUMP_VELOCITY =15;
   neo.Vec2 vel;
   // melee, weapon.
   boolean permeate = false;
@@ -35,7 +35,7 @@ abstract public class player extends sprite {
     this.criticalText = new text("0.00%", x, y, "0xFFFFFF", 48);
   }
 
-  void move(ArrayList<platform> platforms, double TICK_SCALE) {
+  void move(ArrayList<platform> platforms, double FRAME_SCALING) {
     double movement_scalar = 5.0;
     if (this.directions[0] == this.directions[1] == this.directions[2] == this.directions[3] == false) {
       this.source_dim.y=0;
@@ -56,12 +56,12 @@ abstract public class player extends sprite {
             this.source_dim.y = 192;
             boolean surface = this.onSurface(platforms, this.pos);
             if (surface && this.jumps[0]) {
-              this.vel.y = -this.JUMP_FORCE;
+              this.vel.y = -this.JUMP_VELOCITY;
               this.jump_tick = 0;
               this.jumps[0] = false;
               this.jumps[1] = true;
             } else if (!surface && this.jumps[1] && this.jumps[2] && this.ddt >= DOUBLE_JUMP) {
-              this.vel.y = -this.DOUBLE_JUMP_FORCE;
+              this.vel.y = -this.DOUBLE_JUMP_VELOCITY;
               this.jump_tick = 0;
               this.jumps = new boolean[]{this.jumps[0], true, false, true};
             }
@@ -80,7 +80,7 @@ abstract public class player extends sprite {
           }
         }
       }
-      this.imgUpdate(TICK_SCALE);
+      this.imgUpdate(FRAME_SCALING);
     }
   }
 

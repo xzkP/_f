@@ -87,6 +87,8 @@ public class window {
     this.ground.permeable = false;
     this.platforms.add(ground);
     this.bouncers.add(new bouncer(ground, 64, 28, this.nn));
+
+		sound test = new sound("./sounds/clashing.wav");
   }
 
 	// read in platforms from file --> fn is filename

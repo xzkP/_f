@@ -166,11 +166,11 @@ public class neo {
 		}
 		return scaled;
 	}
-	
+
 	public Matrix sub(Matrix m1, Matrix m2) {
 		return add(m1, scale(m2, -1));
 	}
-	
+
 	public Matrix matmul(Matrix m1, Matrix m2) {
 		assert(m1.cols == m2.rows);
 		Matrix mm = new Matrix(m1.rows, m2.cols);

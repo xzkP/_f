@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.awt.image.BufferedImage;
 import java.awt.*;
 
-public class weapon { 
+public class weapon {
   ArrayList<bullet> bullets = new ArrayList<bullet>();
   String name, description;
   String bullet_fn;
@@ -20,14 +20,14 @@ public class weapon {
     this.dmg = damage;
     this.nn = n;
   }
-  public void update(int TICKS) {
+  public void updateBullets(int TICKS) {
     for (Iterator<bullet> i=bullets.iterator(); i.hasNext();) {
       try {
         bullet b = i.next();
-        b.update();
-        if (b.cticks >= TICKS) { i.remove(); }
+        b.updatePos();
+        if (b.survivalTicks >= TICKS) { i.remove(); }
       } catch (Exception e) { System.out.println(e); }
-    } 
+    }
   }
   public void collide(ArrayList<platform> platforms) {
     for (Iterator<bullet> i=bullets.iterator(); i.hasNext();) {
@@ -39,7 +39,7 @@ public class weapon {
           neo.Vec2 pdim = p.getDimensions();
           Shape pb = new Rectangle2D.Double(p.getPos().x, p.getPos().y, pdim.x, pdim.y);
           if (boundary.intersects((Rectangle2D) pb)) {
-            try { 
+            try {
               p.shoot(b);
               i.remove();
             } catch (Exception e) { System.out.println(e); }
@@ -49,15 +49,15 @@ public class weapon {
     }
   }
   public void render(Graphics g, neo.Vec2 scope, neo.Vec2 dimensions) {
-    int px = (int) scope.x, py = (int) scope.y, dx = (int) dimensions.x, dy = (int) dimensions.y;
+    int px = (int) Math.round(scope.x), py = (int) Math.round(scope.y), dx = (int) Math.round(dimensions.x), dy = (int) Math.round(dimensions.y);
     int lb_x = (px/dx)*dx, ub_x = (px/dx+1)*dx;
 
     try {
       for (bullet b : bullets) {
         neo.Vec2 dim = b.img.dimensions();
         if (b.position.x > lb_x && b.position.x < ub_x) {
-          int dpx = ((int)(b.position.x))%((int)(dimensions.x)), dpy = ((int)(b.position.y))%((int)(dimensions.y));
-          g.drawImage(b.img.getImg(), dpx, dpy, dpx+(int)(dim.x), dpy+(int)(dim.y), 0, 0, (int) b.img.dimensions().x, (int) b.img.dimensions().y, null);
+          int dpx = ((int) Math.round(b.position.x))%((int) Math.round(dimensions.x)), dpy = ((int) Math.round(b.position.y))%((int) Math.round(dimensions.y));
+          g.drawImage(b.img.getImg(), dpx, dpy, dpx+((int) Math.round(dim.x)), dpy+((int) Math.round(dim.y)), 0, 0, (int) Math.round(b.img.dimensions().x), (int) Math.round(b.img.dimensions().y), null);
         }
       }
     } catch (Exception e) { System.out.println(e); }
@@ -76,29 +76,26 @@ public class weapon {
           Shape hitbox = new Rectangle2D.Double(p.position().x, p.position().y, pdim.x, pdim.y);
           if (bullet_bound.intersects((Rectangle2D) hitbox)) {
             neo.Vec2 position = p.position();
-            text dmg = new text(String.format("%.2f", b.dmg), (int) position.x, (int) (position.y-p.dimensions().y), "0xFFFFFF");
+            text dmg = new text(String.format("%.2f", b.dmg), (int) Math.round(position.x), (int) Math.round(position.y-p.dimensions().y), "0xFFFFFF");
             q.add(dmg);
-            //p.modVel(b.forward?1:-1*3, -5);
-            p.updateCritical((b.dmg/b.baseDmg)*Math.random()*10+5, b.forward);
-            i.remove(); 
+            p.updateCritical(b);
+            i.remove();
           }
         }
       }
     } catch (Exception e) { System.out.println(e); }
   }
   public void shoot(neo.Vec2 p, boolean f) {
-    bullet b = new bullet("sprites/fireball.bmp", dmg, 32, 32, 1, 1, this.nn);
+    bullet b = new bullet("sprites/fireball.bmp", dmg, 32, 32, 1, 1, f, this.nn);
     b.shot = true;
     b.position = nn.new Vec2(p.x, p.y);
     b.position.x += (f?1:-1)*b.img.dimensions().x;
-    b.forward = f;
     bullets.add(b);
   }
   public void shoot(neo.Vec2 p, boolean f, bullet b) {
     b.shot = true;
     b.position = nn.new Vec2(p.x, p.y);
     b.position.x += (f?1:-1)*b.img.dimensions().x;
-    b.forward = f;
     bullets.add(b);
   }
   public void erase() {

@@ -13,8 +13,10 @@ public class ogre extends player {
 
   public void ult() {
     // TODO: add gravity
-    bullet boulder = new bullet("./sprites/rock.bmp", ULT_DMG, 64, 64, 1, 1, nn); 
-    this.attacks.get(1).shoot(this.pos, this.forward, boulder);
+    bullet boulder = new bullet("./sprites/rock.bmp", ULT_DMG, 64, 64, 1, 1, this.forward, this.nn);
+    boulder.setVelocity(nn.new Vec2(6, -5));
+    boulder.setGravity(nn.new Vec2(0, 0.1));
+    this.attacks.get(1).shoot(nn.new Vec2(this.pos.x, this.pos.y-10), this.forward, boulder);
   }
 };
 

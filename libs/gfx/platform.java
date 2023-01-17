@@ -16,7 +16,7 @@ public class platform {
 	public boolean infinite = false, collide = true, damageable = false, permeable = true, loaded = true;
   double health = Integer.MAX_VALUE;
   neo nn;
-	neo.Vec2 dimensions, pos, tdim;
+	neo.Vec2 dimensions, pos, tile_dimensions;
 	Color pc;
   BufferedImage tile;
 	public platform(int x, int y, int w, int h, neo n) {
@@ -26,7 +26,7 @@ public class platform {
       this.nn = n;
       this.dimensions = this.nn.new Vec2(Math.max(1, w/tw)*tw, Math.max(1, h/th)*th);
       this.pos = this.nn.new Vec2(x, y);
-      this.tdim = this.nn.new Vec2(tw, th);
+      this.tile_dimensions = this.nn.new Vec2(tw, th);
     } catch (Exception e) {
       this.loaded = false;
     }
@@ -39,7 +39,7 @@ public class platform {
       this.dimensions = this.nn.new Vec2(Math.max(1, w/tw)*tw, Math.max(1, h/th)*th);
       this.pos = nn.new Vec2(x, y);
       this.assignColor(c);
-      this.tdim = this.nn.new Vec2(tw, th);
+      this.tile_dimensions = this.nn.new Vec2(tw, th);
     } catch (Exception e) {
       this.loaded = false;
     }
@@ -53,7 +53,7 @@ public class platform {
       this.pos = nn.new Vec2(x, y);
       this.assignColor(c);
       this.title = t;
-      this.tdim = this.nn.new Vec2(tw, th);
+      this.tile_dimensions = this.nn.new Vec2(tw, th);
     } catch (Exception e) {
       this.loaded = false;
     }
@@ -65,7 +65,7 @@ public class platform {
       this.nn = n;
       this.dimensions = this.nn.new Vec2(Math.max(1, w/tw)*tw, Math.max(1, h/th)*th);
       this.pos = nn.new Vec2(x, y);
-      this.tdim = this.nn.new Vec2(tw, th);
+      this.tile_dimensions = this.nn.new Vec2(tw, th);
       this.assignColor(c);
     } catch (Exception e) {
       this.loaded = false;
@@ -108,9 +108,9 @@ public class platform {
 		pc = new Color(R, G, B, A);
 	}
   public void render(Graphics g) {
-    for (int x = 0; x < this.dimensions.x/tdim.x; x++) {
-      for (int y = 0; y < this.dimensions.y/tdim.y; y++) {
-        g.drawImage(this.tile, (int) (x*tdim.x+this.pos.x), (int) (y*tdim.y+this.pos.y), null);
+    for (int x = 0; x < this.dimensions.x/tile_dimensions.x; x++) {
+      for (int y = 0; y < this.dimensions.y/tile_dimensions.y; y++) {
+        g.drawImage(this.tile, (int) Math.round(x*tile_dimensions.x+this.pos.x), (int) Math.round(y*tile_dimensions.y+this.pos.y), null);
       }
     }
 

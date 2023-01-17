@@ -39,7 +39,7 @@ abstract public class player extends sprite {
     double movement_scalar = 5.0;
     if (this.directions[0] == this.directions[1] == this.directions[2] == this.directions[3] == false) {
       this.source_dim.y=0;
-    } 
+    }
     for (int i = 0; i < this.directions.length; i++) {
       if (this.directions[i]) {
         neo.Vec2 move_vector;
@@ -159,15 +159,13 @@ abstract public class player extends sprite {
     return false;
   }
 
-  public void updateCritical(double critPercent, boolean forward) {
-    this.crit += critPercent;
+  public void updateCritical(bullet b) {
+    this.crit += ((b.getDmg()/b.dmgInfo()[1])*Math.random()*5+5);
     this.criticalText.updateMsg(String.format("%.2f", this.crit)+"%");
-    // knockback based on critical
     boolean critical = Double.compare(Math.random()*Math.random(), (1-this.crit/100)) >= 0;
-    double scalar = (critical?Math.random()*1.5+1:1);
-    this.modVel((forward?1:-1)*3*scalar, -5*scalar);
+    double scalar = (critical?Math.random()*0.5+1:1);
+    this.modVel((b.isForward()?1:-1)*b.knockback.x*scalar, b.knockback.y*scalar);
   }
-
 
   abstract public void ult();
 };

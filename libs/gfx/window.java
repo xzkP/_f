@@ -15,32 +15,32 @@ import java.util.Iterator;
 import javax.imageio.ImageIO;
 
 public class window {
-  // all tick rates are based on 60.
-	private final int 
+  // defining constants
+  private final int
     FRAME_PERIOD = 120, BULLET_TICKS = 300, SHOOT_TICK = 35, BOUNCER_HEIGHT = 5, DEATH=600;
   private double fps, TICK_SCALE = FRAME_PERIOD/60.0, JUMP_GRAVITY=0.7/TICK_SCALE, FALL_GRAVITY=0.15/TICK_SCALE, LAST=0, JUMP_FORCE=15.0;
   int jf=0, djf=0;
   neo nn = new neo();
-	JFrame frame;
-	Panel p;
-	InputKey keys;
-	int width, height;
-	player p1, p2;
+  JFrame frame;
+  Panel p;
+  InputKey keys;
+  int width, height;
+  player p1, p2;
   platform ground;
   ArrayList<player> players = new ArrayList<player>();
-	ArrayList<platform> platforms = new ArrayList<platform>();
+  ArrayList<platform> platforms = new ArrayList<platform>();
   ArrayList<bouncer> bouncers = new ArrayList<bouncer>();
   ArrayList<text> queue = new ArrayList<text>();
   int hex_bg = Integer.valueOf("000000", 16);
   Color bg;
-	public window(String w_title, int w, int h) {
+  public window(String w_title, int w, int h) {
     bg = new Color(hex_bg>>16&0xFF, hex_bg>>8&0xFF, hex_bg&0xFF);
-		this.width = w;
-		this.height = h;
+    this.width = w;
+    this.height = h;
     p1 = new elf("./sprites/spritesheet_f.bmp", w/2, 0, 4, 4, this.nn);
     // bottom left
     p1.criticalTextInit(100, this.height-100);
-    p1.shootable = (int) (SHOOT_TICK*TICK_SCALE);
+    p1.shootable = (int) Math.round(SHOOT_TICK*TICK_SCALE);
     p1.movement = new HashMap<Character, Integer>() {{
       put('←', 0);
       put('↑', 1);
@@ -51,7 +51,7 @@ public class window {
     }};
 
     p2 = new ogre("./sprites/spritesheet_ogre.bmp", w/2, 0, 4, 4, this.nn);
-    p2.shootable = (int) (SHOOT_TICK*TICK_SCALE);
+    p2.shootable = (int) Math.round(SHOOT_TICK*TICK_SCALE);
     // bottom right
     p2.criticalTextInit(this.width-100-3*48, this.height-100);
     p2.movement = new HashMap<Character, Integer>() {{
@@ -67,14 +67,14 @@ public class window {
     players.add(p1);
     players.add(p2);
 
-		frame = new JFrame(w_title);
-		p = new Panel();
-		frame.setSize(width, height);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    frame = new JFrame(w_title);
+    p = new Panel();
+    frame.setSize(width, height);
+    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.add(p);
-		keys = new InputKey();
-		p.addKeyListener(keys);
-		frame.setVisible(true);
+    keys = new InputKey();
+    p.addKeyListener(keys);
+    frame.setVisible(true);
 
     frame.addComponentListener(new ComponentAdapter() {
       public void componentResized(ComponentEvent e) {
@@ -89,7 +89,7 @@ public class window {
     this.ground.permeable = false;
     this.platforms.add(ground);
     this.bouncers.add(new bouncer(ground, 64, 28, this.nn));
-	}
+  }
 
   void level(String fn) {
     try (BufferedReader f = new BufferedReader(new FileReader(fn))) {
@@ -105,10 +105,10 @@ public class window {
           key = l.substring(0, l.indexOf(":")).strip().toLowerCase();
           additional = (l.contains("{"));
           if (!additional) {
-            tmp.add(l.substring(l.indexOf(":")+1).strip()); 
+            tmp.add(l.substring(l.indexOf(":")+1).strip());
           }
           else { nested++; continue; }
-        } 
+        }
 
         if (additional && !(l.equals("{") || l.equals("}"))) {
           tmp.add(l);
@@ -149,7 +149,7 @@ public class window {
     for (HashMap<String, String> info : split) {
       if (info.containsKey("position") && info.containsKey("dimensions")) {
         neo.Vec2 d_v, p_v;
-        String pos = info.get("position").replace("[","").replace("]","").replace("{","").replace("}","").strip(), 
+        String pos = info.get("position").replace("[","").replace("]","").replace("{","").replace("}","").strip(),
                dim = info.get("dimensions").replace("[","").replace("]","").replace("{","").replace("}","").strip();
         String p1 = pos.substring(0, pos.indexOf(",")).strip(),
                p2 = pos.substring(pos.indexOf(",")+1).strip(),
@@ -159,7 +159,7 @@ public class window {
         d_v = this.nn.new Vec2(Integer.parseInt(d1), Integer.parseInt(d2));
         String hex = (info.containsKey("hex")?info.get("hex"):"222222"), title=(info.containsKey("title")?info.get("title"):String.format("P%d", this.platforms.size()));
         // assuming that platform is rectangular (TODO: add other shapes)
-        platform p = new platform((int) p_v.x, (int) p_v.y, (int) d_v.x, (int) d_v.y, this.nn);
+        platform p = new platform((int) Math.round(p_v.x), (int) Math.round(p_v.y), (int) Math.round(d_v.x), (int) Math.round(d_v.y), this.nn);
         p.assignColor(Integer.parseInt(hex, 16));
         if (info.containsKey("health")) {
           p.setHealth(Double.parseDouble(info.get("health")));
@@ -169,23 +169,23 @@ public class window {
     }
   }
 
-	public void adjust() {
+  public void adjust() {
     for (Iterator<platform> p=platforms.iterator(); p.hasNext();) {
       platform pp = p.next();
       if (pp.health <= 0) {
-        try { 
+        try {
           p.remove();
-        } catch (Exception e) { 
-          System.out.println(e); 
+        } catch (Exception e) {
+          System.out.println(e);
         }
       }
     }
-	}
+  }
 
-	public void exec() {
+  public void exec() {
     int delay = 35;
-		while (true) {
-			frame.repaint();
+    while (true) {
+      frame.repaint();
       frame.getContentPane().setBackground(Color.YELLOW);
       for (player player : players) {
         if (player.permeate && !player.collide(player.pt, player.pos)) {
@@ -226,7 +226,7 @@ public class window {
         player.modPos(player.vel);
 
         for (weapon w : player.attacks) {
-          w.update((int) (BULLET_TICKS*TICK_SCALE));
+          w.updateBullets((int) Math.round(BULLET_TICKS*TICK_SCALE));
           w.collide(platforms);
         }
 
@@ -238,20 +238,20 @@ public class window {
         }
         player.shootable++;
       }
-			this.adjust();
-			try { Thread.sleep(1000/FRAME_PERIOD); } catch (Exception e) { System.out.println(e); };  
-		}
-	}
+      this.adjust();
+      try { Thread.sleep(1000/FRAME_PERIOD); } catch (Exception e) { System.out.println(e); };
+    }
+  }
 
-	class Panel extends JPanel {
+  class Panel extends JPanel {
     private long last=0;
-		public Panel() {
-			setFocusable(true);
-			requestFocusInWindow();
-		}
-		@Override
-		public void paintComponent(Graphics g) {
-			super.paintComponent(g);
+    public Panel() {
+      setFocusable(true);
+      requestFocusInWindow();
+    }
+    @Override
+    public void paintComponent(Graphics g) {
+      super.paintComponent(g);
       p.setBackground(bg);
 
       text FPS = new text("", 15, 30, "0xFFFFFF");
@@ -259,19 +259,19 @@ public class window {
       FPS.renderText(g);
       last = System.nanoTime();
 
-			// check if platform is in viewing distance + render
-			for (platform p : platforms) {
-				p.pos.x += (p.pos.x%50==0?1:0);
+      // check if platform is in viewing distance + render
+      for (platform p : platforms) {
+        p.pos.x += (p.pos.x%50==0?1:0);
         if (p.health > 0 || p.infinite) {
           p.render(g);
-				}
-			}
+        }
+      }
 
       for (bouncer b : bouncers) {
         b.render(g);
       }
 
-			/* boolean Graphics.drawImage(Image img,
+      /* boolean Graphics.drawImage(Image img,
        int dstx1, int dsty1, int dstx2, int dsty2,
        int srcx1, int srcy1, int srcx2, int srcy2,
        ImageObserver observer); */
@@ -280,7 +280,7 @@ public class window {
         x.criticalText.renderText(g);
         if (x.loaded) {
           neo.Vec2 dim = x.dimensions();
-          g.drawImage(x.img, (int) x.pos.x, (int) x.pos.y, (int) (x.pos.x+dim.x), (int) (x.pos.y+dim.y), (int) (x.source_dim.x), (int) (x.source_dim.y), (int) (x.source_dim.x+dim.x), (int) (x.source_dim.y+dim.y), null);
+          g.drawImage(x.img, (int) Math.round(x.pos.x), (int) Math.round(x.pos.y), (int) Math.round(x.pos.x+dim.x), (int) Math.round(x.pos.y+dim.y), (int) Math.round(x.source_dim.x), (int) Math.round(x.source_dim.y), (int) Math.round(x.source_dim.x+dim.x), (int) Math.round(x.source_dim.y+dim.y), null);
           for (weapon wp : x.attacks) {
             wp.render(g, x.pos, nn.new Vec2(width, height));
             wp.hit(players, i, g, queue);
@@ -295,20 +295,20 @@ public class window {
         if (t.hasLimit && t.ticks >= t.limit) {
           try {
             i.remove();
-          } catch (Exception e) { 
-            System.out.println(e); 
+          } catch (Exception e) {
+            System.out.println(e);
           }
         } else {
           t.renderText(g);
         }
       }
-		}
-	};
+    }
+  };
 
-	public class InputKey implements KeyListener {
-		public void keyPressed(KeyEvent e) {
-			/* left , up, right, down 
-			 	 [ 37, 38, 39, 40 ] */
+  public class InputKey implements KeyListener {
+    public void keyPressed(KeyEvent e) {
+      /* left , up, right, down
+         [ 37, 38, 39, 40 ] */
       char key = KeyEvent.getKeyText(e.getKeyCode()).charAt(0);
       for (player p : players) {
         if (p.movement.containsKey(key)) {
@@ -332,19 +332,19 @@ public class window {
           }
         }
       }
-		}
+    }
 
-		public void keyReleased(KeyEvent e) {
+    public void keyReleased(KeyEvent e) {
       char key = KeyEvent.getKeyText(e.getKeyCode()).charAt(0);
       for (player p : players) {
         if (p.movement.containsKey(key)) {
           int index = p.movement.get(key);
           if (index >= 0 && index <= 3) {
             p.directions[index] = false;
-          } 
+          }
         }
       }
-		}
-		public void keyTyped(KeyEvent e) {}
-	};
+    }
+    public void keyTyped(KeyEvent e) {}
+  };
 };

@@ -88,7 +88,7 @@ public class window {
     this.ground = new platform(100, 800, width-200, 100, "grey", this.nn);
     this.ground.permeable = false;
     this.platforms.add(ground);
-    this.bouncers.add(new bouncer(ground, 64, 64, this.nn));
+    this.bouncers.add(new bouncer(ground, 64, 28, this.nn));
 	}
 
   void level(String fn) {

@@ -330,7 +330,7 @@ public class window {
           } else {
             switch (index) {
               case (4):
-                p.melee(players.get(1-i), MELEE_RANGE);
+                p.melee(players.get(1-i), MELEE_RANGE, textQueue);
                 break;
               case (5):
                 if (p.shootable >= SHOOT_DELAY*FRAME_SCALING) {

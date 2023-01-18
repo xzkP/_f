@@ -165,14 +165,19 @@ abstract public class player extends sprite {
     this.modVel((b.isForward()?1:-1)*b.knockback.x*scalar, b.knockback.y*scalar);
   }
 
+	public void updateCritical(double dmg) {
+		this.crit += (Math.random()*(this.crit!=0?this.crit:1)/10)*dmg;
+		this.criticalText.updateMsg(String.format("%.2f", this.crit)+"%");
+	}
+
 	// check if the second player is within the range, and push him back
-	public void melee(player p2, double RANGE) {
+	public void melee(player p2, double RANGE, ArrayList<text> queue) {
 		Rectangle2D p1_boundary, p2_boundary;
 		neo.Vec2 p1_dimensions = this.dimensions(), p2_dimensions = p2.dimensions(), p2_position = p2.position();
 		p2_boundary = new Rectangle2D.Double(p2_position.x, p2_position.y, p2_dimensions.x, p2_dimensions.y);
 
 		// p1_boundary must be according to whether the character is facing forward or not
-		p1_boundary = new Rectangle2D.Double( this.pos.x-(this.forward?0:RANGE), this.pos.y-(this.forward?0:RANGE), p1_dimensions.x+RANGE, p1_dimensions.y+RANGE);
+		p1_boundary = new Rectangle2D.Double(this.pos.x-(this.forward?0:RANGE), this.pos.y-RANGE, p1_dimensions.x+RANGE, p1_dimensions.y+RANGE);
 
 		boolean inRange = (p1_boundary.intersects(p2_boundary));
 
@@ -180,14 +185,13 @@ abstract public class player extends sprite {
 			Rectangle2D intersection = p1_boundary.createIntersection(p2_boundary);
 			neo.Vec2 POI = nn.new Vec2(intersection.getX()+intersection.getWidth()/2, intersection.getY()+intersection.getHeight()/2), midpoint = nn.new Vec2(this.pos.x+this.dimensions().x/2, this.pos.y+this.dimensions().y/2);
 			neo.Vec2 t = POI.subtract(midpoint);
-			double angle =
-				Math.acos(t.x/(Math.sqrt(Math.pow(t.x,2)+Math.pow(t.y, 2))));
-			p2.modVel(3*(1+Math.cos(angle)), -3*(1+Math.sin(angle)));
-
-			System.out.println(angle*180/Math.PI);
+			double angle = Math.acos(t.x/(Math.sqrt(Math.pow(t.x,2)+Math.pow(t.y, 2))));
+			p2.modVel(1.5*(1+Math.cos(angle)), -2.75*(1+Math.sin(angle)));
+			// TODO: make dmg according to location hit --> most damage is done from the bottom & the top [sin(angle) will resolve the problem]
+			double rate = Math.sin(angle), dmg = Math.max(0.5, rate)*10;
+			queue.add(new text(String.format("%.2f", dmg), (int) this.pos.x, (int) this.pos.y, "0xFFFFFF"));
+			p2.updateCritical(dmg);
 		}
-
-		System.out.println(inRange);
 	}
 
   abstract public void ult();

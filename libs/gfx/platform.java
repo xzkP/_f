@@ -119,8 +119,8 @@ public class platform {
     neo.Vec2 dim = main.dimensions();
     boolean ret =  (((position.x+dim.x >= this.pos.x && position.x+dim.x <= this.pos.x+this.dimensions.x) || (position.x >= this.pos.x && position.x <= this.pos.x+this.dimensions.x) || this.infinite) && position.y+dim.y >= this.pos.y && position.y+dim.y <= this.pos.y+this.dimensions.y);
     // adjust main so that it lies on the platform.
-    main.modPos(0, (ret&&!main.permeate)?this.pos.y-(main.pos.y+dim.y):0);
-    return ret;
+		main.modPos(0, (ret&&!main.permeate)?this.pos.y-(main.pos.y+dim.y):0);
+		return ret;
   }
   @Override
   public String toString() {

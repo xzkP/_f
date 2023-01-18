@@ -18,15 +18,17 @@ public class window {
 	// constants
 	private final int FRAMES = 120, BULLET_SPAN = 300, SHOOT_DELAY = 20, DEATH_RANGE = 600;
 	private double
-		FPS, FRAME_SCALING = FRAMES/60.0, GRAVITY = 0.15/FRAME_SCALING, JUMPING_GRAVITY = 0.7/FRAME_SCALING, JUMP_VELOCITY = 15.0;
+		FPS, FRAME_SCALING = FRAMES/60.0, GRAVITY = 0.15/FRAME_SCALING, JUMPING_GRAVITY = 0.7/FRAME_SCALING, JUMP_VELOCITY = 15.0, MELEE_RANGE = 5;
   neo nn = new neo();
   JFrame frame;
   Panel p;
   InputKey keys;
   int width, height;
+	sprite ogre_headshot, elf_headshot;
   player p1, p2;
   platform ground;
   ArrayList<player> players = new ArrayList<player>();
+	ArrayList<sprite> headshots = new ArrayList<sprite>();
   ArrayList<platform> platforms = new ArrayList<platform>();
   ArrayList<bouncer> bouncers = new ArrayList<bouncer>();
   ArrayList<text> textQueue = new ArrayList<text>();
@@ -34,8 +36,14 @@ public class window {
   Color bg;
   public window(String w_title, int w, int h) {
     bg = new Color(hex_bg>>16&0xFF, hex_bg>>8&0xFF, hex_bg&0xFF);
+
     this.width = w;
     this.height = h;
+
+		headshots.add(new sprite("./sprites/elf_headshot.bmp", 16, this.height-150, 1, 1, this.nn));
+		headshots.add(new sprite("./sprites/ogre_headshot.bmp", this.width-96, this.height-150, 1, 1, this.nn));
+
+
     p1 = new elf("./sprites/spritesheet_f.bmp", w/2, 0, 4, 4, this.nn);
     // bottom left
     p1.criticalTextInit(100, this.height-100);
@@ -213,7 +221,6 @@ public class window {
             player.vel.y += GRAVITY*2;
             player.vel.y = Math.min(100, player.vel.y);
           }
-          player.source_dim.y = 3*64;
         } else {
           if (!player.permeate) {
             player.jumps = new boolean[]{player.jumps[0], false, true, false };
@@ -272,6 +279,10 @@ public class window {
         b.render(g);
       }
 
+			for (sprite headshot : headshots) {
+				headshot.render(g);
+			}
+
       /* boolean Graphics.drawImage(Image img,
        int dstx1, int dsty1, int dstx2, int dsty2,
        int srcx1, int srcy1, int srcx2, int srcy2,
@@ -280,8 +291,7 @@ public class window {
         player x = players.get(i);
         x.criticalText.renderText(g);
         if (x.loaded) {
-          neo.Vec2 dim = x.dimensions();
-          g.drawImage(x.img, (int) (x.pos.x), (int) (x.pos.y), (int) (x.pos.x+dim.x), (int) (x.pos.y+dim.y), (int) (x.source_dim.x), (int) (x.source_dim.y), (int) (x.source_dim.x+dim.x), (int) (x.source_dim.y+dim.y), null);
+					x.render(g);
           for (weapon wp : x.attacks) {
             wp.render(g, x.pos, nn.new Vec2(width, height));
             wp.hit(players, i, textQueue);
@@ -311,7 +321,8 @@ public class window {
       /* left , up, right, down
          [ 37, 38, 39, 40 ] */
       char key = KeyEvent.getKeyText(e.getKeyCode()).charAt(0);
-      for (player p : players) {
+			for (int i = 0; i < players.size(); i++) {
+				player p = players.get(i);
         if (p.movement.containsKey(key)) {
           int index = p.movement.get(key);
           if (index >= 0 && index <= 3) {
@@ -319,13 +330,13 @@ public class window {
           } else {
             switch (index) {
               case (4):
+                p.melee(players.get(1-i), MELEE_RANGE);
+                break;
+              case (5):
                 if (p.shootable >= SHOOT_DELAY*FRAME_SCALING) {
                   p.attacks.get(0).shoot(p.position(), p.forward);
                   p.shootable = 0;
                 }
-                break;
-              case (5):
-                p.ult();
                 break;
               default:
                 break;

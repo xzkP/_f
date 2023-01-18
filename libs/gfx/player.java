@@ -37,9 +37,6 @@ abstract public class player extends sprite {
 
   void move(ArrayList<platform> platforms, double FRAME_SCALING) {
     double movement_scalar = 5.0;
-    if (this.directions[0] == this.directions[1] == this.directions[2] == this.directions[3] == false) {
-      this.source_dim.y=0;
-    }
     for (int i = 0; i < this.directions.length; i++) {
       if (this.directions[i]) {
         neo.Vec2 move_vector;
@@ -53,7 +50,7 @@ abstract public class player extends sprite {
           }
         } else {
           if (i%2==i) {
-            this.source_dim.y = 192;
+            this.source_dim.y = 64*3;
             boolean surface = this.onSurface(platforms, this.pos);
             if (surface && this.jumps[0]) {
               this.vel.y = -this.JUMP_VELOCITY;
@@ -87,10 +84,11 @@ abstract public class player extends sprite {
   public void respawn(double px, double py) {
     this.pos = this.nn.new Vec2(px, py);
     this.vel = this.nn.new Vec2(0, 0);
+    this.crit = 0;
+		this.criticalText.updateMsg("0.00%");
     for (weapon w : this.attacks) {
       w.erase();
     }
-    this.crit = 0;
   }
 
   public platform getSurface(ArrayList<platform> platforms) {
@@ -162,10 +160,35 @@ abstract public class player extends sprite {
   public void updateCritical(bullet b) {
     this.crit += ((b.getDmg()/b.dmgInfo()[1])*Math.random()*5+5);
     this.criticalText.updateMsg(String.format("%.2f", this.crit)+"%");
-    boolean critical = Double.compare(Math.random()*Math.random(), (1-this.crit/100)) >= 0;
-    double scalar = (critical?Math.random()*0.5+1:1);
+    boolean critical = Double.compare(Math.random(), (1-this.crit/100)) >= 0;
+    double scalar = (critical?Math.random()*2+1:1);
     this.modVel((b.isForward()?1:-1)*b.knockback.x*scalar, b.knockback.y*scalar);
   }
+
+	// check if the second player is within the range, and push him back
+	public void melee(player p2, double RANGE) {
+		Rectangle2D p1_boundary, p2_boundary;
+		neo.Vec2 p1_dimensions = this.dimensions(), p2_dimensions = p2.dimensions(), p2_position = p2.position();
+		p2_boundary = new Rectangle2D.Double(p2_position.x, p2_position.y, p2_dimensions.x, p2_dimensions.y);
+
+		// p1_boundary must be according to whether the character is facing forward or not
+		p1_boundary = new Rectangle2D.Double( this.pos.x-(this.forward?0:RANGE), this.pos.y-(this.forward?0:RANGE), p1_dimensions.x+RANGE, p1_dimensions.y+RANGE);
+
+		boolean inRange = (p1_boundary.intersects(p2_boundary));
+
+		if (inRange) {
+			Rectangle2D intersection = p1_boundary.createIntersection(p2_boundary);
+			neo.Vec2 POI = nn.new Vec2(intersection.getX()+intersection.getWidth()/2, intersection.getY()+intersection.getHeight()/2), midpoint = nn.new Vec2(this.pos.x+this.dimensions().x/2, this.pos.y+this.dimensions().y/2);
+			neo.Vec2 t = POI.subtract(midpoint);
+			double angle =
+				Math.acos(t.x/(Math.sqrt(Math.pow(t.x,2)+Math.pow(t.y, 2))));
+			p2.modVel(3*(1+Math.cos(angle)), -3*(1+Math.sin(angle)));
+
+			System.out.println(angle*180/Math.PI);
+		}
+
+		System.out.println(inRange);
+	}
 
   abstract public void ult();
 };

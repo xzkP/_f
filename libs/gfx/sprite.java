@@ -52,4 +52,10 @@ public class sprite {
 			this.source_dim.x %= (this.width);
 		}
 	}
+
+	public void render(Graphics g) {
+		neo.Vec2 d = this.dimensions();
+		g.drawImage(this.img, (int) this.pos.x, (int) this.pos.y, (int) (this.pos.x+d.x), (int) (this.pos.y+d.y),
+				(int) (this.source_dim.x), (int) (this.source_dim.y), (int) (this.source_dim.x+d.x), (int) (this.source_dim.y+d.y), null);
+	}
 };

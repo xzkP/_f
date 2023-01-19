@@ -35,6 +35,7 @@ public class weapon {
 
 	public void loadSound(String fn) {
 		this.sfx = new sound(fn);
+		this.sfx.setVolume(0.05);
 	}
 
   public void collide(ArrayList<platform> platforms) {

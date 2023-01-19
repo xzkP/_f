@@ -97,6 +97,11 @@ public class window {
     this.ground.permeable = false;
     this.platforms.add(ground);
     this.bouncers.add(new bouncer(ground, 64, 28, this.nn));
+
+		/*
+		sound bg = new sound("./src/sounds/8bit.wav");
+		bg.setVolume(0.075);
+		bg.loop();*/
   }
 
 	// read in platforms from file --> fn is filename
@@ -203,6 +208,7 @@ public class window {
         player.bounce(bouncers);
         player.jump_tick++;
         player.ddt++;
+				player.walk_tick++;
         player.jumps[0] = (player.jump_tick >= delay*FRAME_SCALING);
 
 

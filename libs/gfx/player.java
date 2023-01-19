@@ -15,7 +15,7 @@ abstract public class player extends sprite {
 	HashMap<Integer, Integer> movement;
   final int DOUBLE_JUMP = 15, ULTABLE = 500;
   protected ArrayList<weapon> attacks = new ArrayList<weapon>();
-  public int ddt = 0, shootable = 0;
+  public int ddt = 0, shootable = 0, walk_tick = 0;
   // jumps[2] = double jump
   // dash[2] -> dash, direction
   public boolean directions[] = { false, false, false, false }, jumps[] = { true, false, true, false}, dash[] = { false, false };
@@ -25,11 +25,14 @@ abstract public class player extends sprite {
   // melee, weapon.
   boolean permeate = false;
   platform pt;
+	sound walk = new sound("./src/sounds/walking.wav"), bounce = new sound("./src/sounds/boing.wav");
 
   public player(String fn, double px, double py, int w_count, int h_count, neo nn) {
     super(fn, px, py, w_count, h_count, nn);
     this.attacks.add(new weapon("fireballs", 30, this.nn));
-    vel = nn.new Vec2(0, 0);
+    this.vel = nn.new Vec2(0, 0);
+		this.walk.setVolume(0.05);
+		this.bounce.setVolume(0.05);
   }
 
   public void criticalTextInit(int x, int y) {
@@ -49,6 +52,10 @@ abstract public class player extends sprite {
           if (!this.collide(platforms, this.pos.add(move_vector), true)) {
             this.modPos(move_vector);
           }
+					if (this.walk_tick >= 75 && this.onSurface(platforms, this.pos)) {
+						this.walk.playBeginning();
+						this.walk_tick = 0;
+					}
         } else {
           if (i%2==i) {
             this.source_dim.y = 64*3;
@@ -123,6 +130,7 @@ abstract public class player extends sprite {
       this.vel.y = (Math.abs(this.vel.y)*-0.25)-10.0;
       this.jumps = new boolean[]{this.jumps[0], true, true, false };
       this.ddt = 0;
+			this.bounce.playBeginning();
       this.modPos(this.vel);
     }
   }
@@ -186,7 +194,8 @@ abstract public class player extends sprite {
 			Rectangle2D intersection = p1_boundary.createIntersection(p2_boundary);
 			neo.Vec2 POI = nn.new Vec2(intersection.getX()+intersection.getWidth()/2, intersection.getY()+intersection.getHeight()/2), midpoint = nn.new Vec2(this.pos.x+this.dimensions().x/2, this.pos.y+this.dimensions().y/2);
 			neo.Vec2 t = POI.subtract(midpoint);
-			double angle = Math.acos(t.x/(Math.sqrt(Math.pow(t.x,2)+Math.pow(t.y, 2))));
+			double distance = Math.sqrt(Math.pow(t.x, 2)+Math.pow(t.y,2));
+			double angle = Math.acos((distance != 0) ? t.x/distance : 0);
 			p2.modVel(1.5*(1+Math.cos(angle)), -2.75*(1+Math.sin(angle)));
 			// TODO: make dmg according to location hit --> most damage is done from the bottom & the top [sin(angle) will resolve the problem]
 			double rate = Math.sin(angle), dmg = Math.max(0.5, rate)*10;

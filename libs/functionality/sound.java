@@ -9,7 +9,7 @@ public class sound {
 	File audioFile;
 	Clip clip;
 	AudioInputStream stream;
-	FloatControl volume;
+	double volume = 1.0;
 	boolean loaded = false, playing = false;
 	long frame;
 	public sound(String fn) {
@@ -22,6 +22,20 @@ public class sound {
 			this.loaded = true;
 			this.pauseClip();
 		} catch (Exception e) { System.out.println(e); }
+	}
+	float getVolume() {
+		FloatControl control = (FloatControl) this.clip.getControl(FloatControl.Type.MASTER_GAIN);
+		return (float) Math.pow(10f, control.getValue()/20f);
+	}
+
+	// v is between 0 - 1 (0 is lowest, 1 is loudest)
+	public void setVolume(double v) {
+		if (v >= 0f && v <= 1f) {
+			FloatControl control = (FloatControl) this.clip.getControl(FloatControl.Type.MASTER_GAIN);
+			float value = 20f * (float) Math.log10(v);
+			this.volume = v;
+			control.setValue(value);
+		}
 	}
 	public void loop() {
 		this.clip.loop(Clip.LOOP_CONTINUOUSLY);
@@ -67,6 +81,7 @@ public class sound {
 			this.stream = AudioSystem.getAudioInputStream(this.audioFile);
 			this.clip = AudioSystem.getClip();
 			this.clip.open(this.stream);
+			this.setVolume(this.volume);
 		} catch (Exception e) { System.out.println(e); }
 	}
 };

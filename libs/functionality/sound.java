@@ -15,7 +15,7 @@ public class sound {
 	public sound(String fn) {
 		try {
 			this.audioFile = new File(fn);
-			this.stream = AudioSystem.getAudioInputStream(this.audioFile);
+			this.stream = AudioSystem.getAudioInputStream(this.audioFile.getAbsoluteFile());
 			this.clip = AudioSystem.getClip();
 			this.clip.open(this.stream);
 			this.frame = 0;

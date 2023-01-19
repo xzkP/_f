@@ -11,7 +11,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 
 abstract public class player extends sprite {
-  HashMap<Character, Integer> movement;
+	// remapping keycodes to more succint movement keys
+	HashMap<Integer, Integer> movement;
   final int DOUBLE_JUMP = 15, ULTABLE = 500;
   protected ArrayList<weapon> attacks = new ArrayList<weapon>();
   public int ddt = 0, shootable = 0;

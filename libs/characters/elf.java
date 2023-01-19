@@ -11,6 +11,5 @@ public class elf extends player {
 
   // shoots multiple bullets at the same time
   public void ult() {
-    //bullet spear = new bullet("./sprites/spear.bmp", ULT_DMG
   }
 };

@@ -92,7 +92,7 @@ public class weapon {
 	}
 
   public void shoot(neo.Vec2 p, boolean f) {
-    bullet b = new bullet("sprites/fireball.bmp", dmg, 32, 32, 1, 1, f, this.nn);
+    bullet b = new bullet("./src/sprites/fireball.bmp", dmg, 32, 32, 1, 1, f, this.nn);
     b.shot = true;
     b.position = nn.new Vec2(p.x, p.y);
     b.position.x += (f?1:-1)*b.img.dimensions().x;

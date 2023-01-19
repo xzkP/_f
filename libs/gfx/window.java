@@ -40,35 +40,35 @@ public class window {
     this.width = w;
     this.height = h;
 
-		headshots.add(new sprite("./sprites/elf_headshot.bmp", 16, this.height-150, 1, 1, this.nn));
-		headshots.add(new sprite("./sprites/ogre_headshot.bmp", this.width-96, this.height-150, 1, 1, this.nn));
+		headshots.add(new sprite("./src/sprites/elf_headshot.bmp", 16, this.height-150, 1, 1, this.nn));
+		headshots.add(new sprite("./src/sprites/ogre_headshot.bmp", this.width-96, this.height-150, 1, 1, this.nn));
 
 
-    p1 = new elf("./sprites/spritesheet_f.bmp", w/2, 0, 4, 4, this.nn);
+    p1 = new elf("./src/sprites/spritesheet_f.bmp", w/2, 0, 4, 4, this.nn);
     // bottom left
     p1.criticalTextInit(100, this.height-100);
     p1.shootable = (int) (SHOOT_DELAY*FRAME_SCALING);
-    p1.movement = new HashMap<Character, Integer>() {{
-      put('←', 0);
-      put('↑', 1);
-      put('→', 2);
-      put('↓', 3);
-      put('N', 4);
-      put('M', 5);
-    }};
+		p1.movement = new HashMap<Integer, Integer>() {{
+			put(37, 0);
+			put(38, 1);
+			put(39, 2);
+			put(40, 3);
+			put(78, 4);
+			put(77, 5);
+		}};
 
-    p2 = new ogre("./sprites/spritesheet_ogre.bmp", w/2, 0, 4, 4, this.nn);
+    p2 = new ogre("./src/sprites/spritesheet_ogre.bmp", w/2, 0, 4, 4, this.nn);
     p2.shootable = (int) (SHOOT_DELAY*FRAME_SCALING);
     // bottom right
     p2.criticalTextInit(this.width-100-3*48, this.height-100);
-    p2.movement = new HashMap<Character, Integer>() {{
-      put('A', 0);
-      put('W', 1);
-      put('D', 2);
-      put('S', 3);
-      put('T', 4);
-      put('Y', 5);
-    }};
+		p2.movement = new HashMap<Integer, Integer>() {{
+			put(65, 0);
+			put(87, 1);
+			put(68, 2);
+			put(83, 3);
+			put(84, 4);
+			put(89, 5);
+		}};
 
     players.add(p1);
     players.add(p2);
@@ -89,18 +89,20 @@ public class window {
       }
     });
 
-    this.level("./levels/1.txt");
+    this.loadLevel("./src/levels/1.txt");
 
     this.ground = new platform(100, 800, width-200, 100, "grey", this.nn);
     this.ground.permeable = false;
     this.platforms.add(ground);
     this.bouncers.add(new bouncer(ground, 64, 28, this.nn));
 
-		sound test = new sound("./sounds/clashing.wav");
+		sound test = new sound("./src/sounds/clashing.wav");
+		test.loop();
+		//test.play();
   }
 
 	// read in platforms from file --> fn is filename
-  void level(String fn) {
+  void loadLevel(String fn) {
     try (BufferedReader f = new BufferedReader(new FileReader(fn))) {
       boolean additional = false;
       int nested = 0;
@@ -318,9 +320,13 @@ public class window {
 
   public class InputKey implements KeyListener {
     public void keyPressed(KeyEvent e) {
+			int key = e.getKeyCode();
+			/* Debugging
+			 char letter = Keyevent.getKeyText(key).charAt(0);
+			 System.out.println(String.format("%c: %d", letter, key));
+			 */
       /* left , up, right, down
          [ 37, 38, 39, 40 ] */
-      char key = KeyEvent.getKeyText(e.getKeyCode()).charAt(0);
 			for (int i = 0; i < players.size(); i++) {
 				player p = players.get(i);
         if (p.movement.containsKey(key)) {
@@ -347,7 +353,7 @@ public class window {
     }
 
     public void keyReleased(KeyEvent e) {
-      char key = KeyEvent.getKeyText(e.getKeyCode()).charAt(0);
+			int key = e.getKeyCode();
       for (player p : players) {
         if (p.movement.containsKey(key)) {
           int index = p.movement.get(key);

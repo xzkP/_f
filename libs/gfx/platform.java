@@ -8,7 +8,7 @@ import java.io.*;
 import javax.imageio.ImageIO;
 
 /* platforms:
- - size & shape --> probably mostly rectangular 
+ - size & shape --> probably mostly rectangular
  - width & height
 */
 public class platform {
@@ -21,7 +21,7 @@ public class platform {
   BufferedImage tile;
 	public platform(int x, int y, int w, int h, neo n) {
     try {
-      this.tile = ImageIO.read(new File("./sprites/wall.bmp"));
+      this.tile = ImageIO.read(new File("./src/sprites/wall.bmp"));
       int tw = tile.getWidth(), th = tile.getHeight();
       this.nn = n;
       this.dimensions = this.nn.new Vec2(Math.max(1, w/tw)*tw, Math.max(1, h/th)*th);
@@ -33,7 +33,7 @@ public class platform {
 	}
 	public platform(int x, int y, int w, int h, String c, neo n) {
     try {
-      tile = ImageIO.read(new File("./sprites/wall.bmp"));
+      tile = ImageIO.read(new File("./src/sprites/wall.bmp"));
       int tw = tile.getWidth(), th = tile.getHeight();
       this.nn = n;
       this.dimensions = this.nn.new Vec2(Math.max(1, w/tw)*tw, Math.max(1, h/th)*th);
@@ -46,7 +46,7 @@ public class platform {
 	}
 	public platform(int x, int y, int w, int h, String c, String t, neo n) {
     try {
-      tile = ImageIO.read(new File("./sprites/wall.bmp"));
+      tile = ImageIO.read(new File("./src/sprites/wall.bmp"));
       int tw = tile.getWidth(), th = tile.getHeight();
       this.nn = n;
       this.dimensions = this.nn.new Vec2(Math.max(1, w/tw)*tw, Math.max(1, h/th)*th);

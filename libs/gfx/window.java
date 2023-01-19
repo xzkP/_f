@@ -96,7 +96,7 @@ public class window {
     this.platforms.add(ground);
     this.bouncers.add(new bouncer(ground, 64, 28, this.nn));
 
-		sound test = new sound("./src/sounds/clashing.wav");
+		sound test = new sound("./src/sounds/blaster.mp3");
 		test.play();
   }
 

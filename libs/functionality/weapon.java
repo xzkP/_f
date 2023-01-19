@@ -15,6 +15,7 @@ public class weapon {
   String bullet_fn;
   double dmg;
   neo nn;
+	sound sfx = null;
 
   public weapon(String nm, double damage, neo n) {
     this.name = nm;
@@ -31,6 +32,10 @@ public class weapon {
       } catch (Exception e) { System.out.println(e); }
     }
   }
+
+	public void loadSound(String fn) {
+		this.sfx = new sound(fn);
+	}
 
   public void collide(ArrayList<platform> platforms) {
     for (Iterator<bullet> i=bullets.iterator(); i.hasNext();) {
@@ -93,6 +98,9 @@ public class weapon {
 
   public void shoot(neo.Vec2 p, boolean f) {
     bullet b = new bullet("./src/sprites/fireball.bmp", dmg, 32, 32, 1, 1, f, this.nn);
+		if (sfx != null) {
+			sfx.play();
+		}
     b.shot = true;
     b.position = nn.new Vec2(p.x, p.y);
     b.position.x += (f?1:-1)*b.img.dimensions().x;

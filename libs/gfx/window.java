@@ -48,6 +48,7 @@ public class window {
     // bottom left
     p1.criticalTextInit(100, this.height-100);
     p1.shootable = (int) (SHOOT_DELAY*FRAME_SCALING);
+		p1.attacks.get(0).loadSound("./src/sounds/fireball.wav");
 		p1.movement = new HashMap<Integer, Integer>() {{
 			put(37, 0);
 			put(38, 1);
@@ -61,6 +62,7 @@ public class window {
     p2.shootable = (int) (SHOOT_DELAY*FRAME_SCALING);
     // bottom right
     p2.criticalTextInit(this.width-100-3*48, this.height-100);
+		p2.attacks.get(0).loadSound("./src/sounds/fireball.wav");
 		p2.movement = new HashMap<Integer, Integer>() {{
 			put(65, 0);
 			put(87, 1);
@@ -95,7 +97,6 @@ public class window {
     this.ground.permeable = false;
     this.platforms.add(ground);
     this.bouncers.add(new bouncer(ground, 64, 28, this.nn));
-
   }
 
 	// read in platforms from file --> fn is filename

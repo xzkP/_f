@@ -97,8 +97,7 @@ public class window {
     this.bouncers.add(new bouncer(ground, 64, 28, this.nn));
 
 		sound test = new sound("./src/sounds/clashing.wav");
-		test.loop();
-		//test.play();
+		test.play();
   }
 
 	// read in platforms from file --> fn is filename

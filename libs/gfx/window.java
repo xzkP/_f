@@ -34,8 +34,14 @@ public class window {
   ArrayList<text> textQueue = new ArrayList<text>();
   int hex_bg = Integer.valueOf("000000", 16);
   Color bg;
+	menu menu;
+
+	public static enum STATE { Menu, Game };
+	public static STATE state = STATE.Menu;
+
   public window(String w_title, int w, int h) {
-    bg = new Color(hex_bg>>16&0xFF, hex_bg>>8&0xFF, hex_bg&0xFF);
+		this.menu = new menu();
+    this.bg = new Color(hex_bg>>16&0xFF, hex_bg>>8&0xFF, hex_bg&0xFF);
 
     this.width = w;
     this.height = h;
@@ -81,6 +87,7 @@ public class window {
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.add(p);
     keys = new InputKey();
+		p.addMouseListener(new MouseInput());
     p.addKeyListener(keys);
     frame.setVisible(true);
 
@@ -265,107 +272,116 @@ public class window {
     }
     @Override
     public void paintComponent(Graphics g) {
-      super.paintComponent(g);
-      p.setBackground(bg);
+			if (state == STATE.Game) {
+				super.paintComponent(g);
+				p.setBackground(bg);
 
-      text FPS = new text("", 15, 30, "0xFFFFFF");
-      FPS.updateMsg(String.format("FPS: %.2f", ((double)1e9/(System.nanoTime()-last))));
-      FPS.renderText(g);
-      last = System.nanoTime();
+				text FPS = new text("", 15, 30, "0xFFFFFF");
+				FPS.updateMsg(String.format("FPS: %.2f", ((double)1e9/(System.nanoTime()-last))));
+				FPS.renderText(g);
+				last = System.nanoTime();
 
-      // check if platform is in viewing distance + render
-      for (platform p : platforms) {
-        p.pos.x += (p.pos.x%50==0?1:0);
-        if (p.health > 0 || p.infinite) {
-          p.render(g);
-        }
-      }
+				// check if platform is in viewing distance + render
+				for (platform p : platforms) {
+					p.pos.x += (p.pos.x%50==0?1:0);
+					if (p.health > 0 || p.infinite) {
+						p.render(g);
+					}
+				}
 
-      for (bouncer b : bouncers) {
-        b.render(g);
-      }
+				for (bouncer b : bouncers) {
+					b.render(g);
+				}
 
-			for (sprite headshot : headshots) {
-				headshot.render(g);
+				for (sprite headshot : headshots) {
+					headshot.render(g);
+				}
+
+				/* boolean Graphics.drawImage(Image img,
+				 int dstx1, int dsty1, int dstx2, int dsty2,
+				 int srcx1, int srcy1, int srcx2, int srcy2,
+				 ImageObserver observer); */
+				for (int i = 0;  i < players.size(); i++) {
+					player x = players.get(i);
+					x.criticalText.renderText(g);
+					if (x.loaded) {
+						x.render(g);
+						for (weapon wp : x.attacks) {
+							wp.render(g, x.pos, nn.new Vec2(width, height));
+							wp.hit(players, i, textQueue);
+						}
+					} else {
+						System.out.println("Unable to open sprite, not loaded");
+					}
+				}
+				for (Iterator<text> i=textQueue.iterator(); i.hasNext();) {
+					text t = i.next();
+					t.ticks++;
+					if (t.hasLimit && t.ticks >= t.limit) {
+						try {
+							i.remove();
+						} catch (Exception e) {
+							System.out.println(e);
+						}
+					} else {
+						t.renderText(g);
+					}
+				}
+			} else if (state == STATE.Menu) {
+				menu.render(g);
+				g.dispose();
 			}
-
-      /* boolean Graphics.drawImage(Image img,
-       int dstx1, int dsty1, int dstx2, int dsty2,
-       int srcx1, int srcy1, int srcx2, int srcy2,
-       ImageObserver observer); */
-      for (int i = 0;  i < players.size(); i++) {
-        player x = players.get(i);
-        x.criticalText.renderText(g);
-        if (x.loaded) {
-					x.render(g);
-          for (weapon wp : x.attacks) {
-            wp.render(g, x.pos, nn.new Vec2(width, height));
-            wp.hit(players, i, textQueue);
-          }
-        } else {
-          System.out.println("Unable to open sprite, not loaded");
-        }
-      }
-      for (Iterator<text> i=textQueue.iterator(); i.hasNext();) {
-        text t = i.next();
-        t.ticks++;
-        if (t.hasLimit && t.ticks >= t.limit) {
-          try {
-            i.remove();
-          } catch (Exception e) {
-            System.out.println(e);
-          }
-        } else {
-          t.renderText(g);
-        }
-      }
     }
   };
 
   public class InputKey implements KeyListener {
     public void keyPressed(KeyEvent e) {
 			int key = e.getKeyCode();
-			/* Debugging
-			 char letter = Keyevent.getKeyText(key).charAt(0);
-			 System.out.println(String.format("%c: %d", letter, key));
-			 */
-      /* left , up, right, down
-         [ 37, 38, 39, 40 ] */
-			for (int i = 0; i < players.size(); i++) {
-				player p = players.get(i);
-        if (p.movement.containsKey(key)) {
-          int index = p.movement.get(key);
-          if (index >= 0 && index <= 3) {
-            p.directions[index] = true;
-          } else {
-            switch (index) {
-              case (4):
-                p.melee(players.get(1-i), MELEE_RANGE, textQueue);
-                break;
-              case (5):
-                if (p.shootable >= SHOOT_DELAY*FRAME_SCALING) {
-                  p.attacks.get(0).shoot(p.position(), p.forward);
-                  p.shootable = 0;
-                }
-                break;
-              default:
-                break;
-            }
-          }
-        }
+			if (state == STATE.Game) {
+				/* Debugging
+				 char letter = Keyevent.getKeyText(key).charAt(0);
+				 System.out.println(String.format("%c: %d", letter, key));
+				 */
+				/* left , up, right, down
+					 [ 37, 38, 39, 40 ] */
+				for (int i = 0; i < players.size(); i++) {
+					player p = players.get(i);
+					if (p.movement.containsKey(key)) {
+						int index = p.movement.get(key);
+						if (index >= 0 && index <= 3) {
+							p.directions[index] = true;
+						} else {
+							switch (index) {
+								case (4):
+									p.melee(players.get(1-i), MELEE_RANGE, textQueue);
+									break;
+								case (5):
+									if (p.shootable >= SHOOT_DELAY*FRAME_SCALING) {
+										p.attacks.get(0).shoot(p.position(), p.forward);
+										p.shootable = 0;
+									}
+									break;
+								default:
+									break;
+							}
+						}
+					}
+				}
       }
     }
 
     public void keyReleased(KeyEvent e) {
 			int key = e.getKeyCode();
-      for (player p : players) {
-        if (p.movement.containsKey(key)) {
-          int index = p.movement.get(key);
-          if (index >= 0 && index <= 3) {
-            p.directions[index] = false;
-          }
-        }
-      }
+			if (state == STATE.Game) {
+				for (player p : players) {
+					if (p.movement.containsKey(key)) {
+						int index = p.movement.get(key);
+						if (index >= 0 && index <= 3) {
+							p.directions[index] = false;
+						}
+					}
+				}
+			}
     }
     public void keyTyped(KeyEvent e) {}
   };

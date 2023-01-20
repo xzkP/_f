@@ -76,7 +76,7 @@ abstract public class player extends sprite {
               this.vel.y += 0.35;
             } else {
               platform g = getSurface(platforms);
-              if (g.permeable) {
+              if (g != null && g.permeable) {
                 this.permeate = true;
                 this.pt = g;
                 this.modVel(0, 0.375);

@@ -177,7 +177,7 @@ abstract public class player extends sprite {
     this.crit += ((b.getDmg()/b.dmgInfo()[1])*Math.random()*5+5);
     this.criticalText.updateMsg(String.format("%.2f", this.crit)+"%  " + String.format("[%d]", this.score));
     boolean critical = Double.compare(Math.random(), (1-this.crit/100)) >= 0;
-    double scalar = (critical?Math.random()*(this.crit/100)+1:1);
+    double scalar = (critical?Math.random()*(this.crit/100)+0.75:1);
     this.modVel((b.isForward()?1:-1)*b.knockback.x*scalar, b.knockback.y*scalar);
   }
 
@@ -201,12 +201,15 @@ abstract public class player extends sprite {
 			Rectangle2D intersection = p1_boundary.createIntersection(p2_boundary);
 			neo.Vec2 POI = nn.new Vec2(intersection.getX()+intersection.getWidth()/2, intersection.getY()+intersection.getHeight()/2), midpoint = nn.new Vec2(this.pos.x+this.dimensions().x/2, this.pos.y+this.dimensions().y/2);
 			neo.Vec2 t = POI.subtract(midpoint);
-			double distance = Math.sqrt(Math.pow(t.x, 2)+Math.pow(t.y,2));
-			double angle = Math.acos((distance != 0) ? t.x/distance : 0);
+			double distance = Math.sqrt(Math.pow(t.x, 2)+Math.pow(t.y,2)), angle = Math.acos((distance != 0) ? t.x/distance : 0);
 			// TODO: make dmg according to location hit --> most damage is done from the bottom & the top [sin(angle) will resolve the problem]
 			double rate = Math.sin(angle), dmg = Math.max(0.5, rate)*10;
 			queue.add(new text(String.format("%.2f", dmg), (int) this.pos.x, (int) this.pos.y, "0xFFFFFF"));
-			p2.modVel(Math.max(this.crit/100, 0.75)*1.5*(1+Math.cos(angle)), Math.max(this.crit/100, 0.75)*-2.75*(1+Math.sin(angle)));
+			neo.Vec2 v = nn.new Vec2(Math.cos(angle), Math.sin(angle)).scale(3.0*Math.max(this.crit/100,0.9));
+			v.y = (-v.y-1)*1.5;
+			p2.modVel(v);
+
+			//p2.modVel(Math.max(this.crit/100, 0.75)*1.5*(1+Math.cos(angle)), Math.max(this.crit/100, 0.75)*-2.75*(1+Math.sin(angle)));
 			p2.updateCritical(dmg);
 		}
 	}

@@ -18,16 +18,19 @@ public class text extends JComponent {
   neo.Vec2 position;
   Color c;
   Font f = new Font("04b03", Font.PLAIN, 24);
+
   public text(String msg, int px, int py) {
     this.message = msg;
     this.position = nn.new Vec2(px, py);
     this.assignColor("0xFFFFFF");
   }
+
   public text(String msg, int px, int py, String color) {
     this.message = msg;
     this.position = nn.new Vec2(px, py);
     this.assignColor(color);
   }
+
   public text(String msg, int px, int py, String color, int fontSize) {
     this.message = msg;
     this.position = nn.new Vec2(px, py);
@@ -54,5 +57,12 @@ public class text extends JComponent {
     g.setColor(this.c);
     g.drawString(this.message, (int) (this.position.x), (int) (this.position.y));
   }
-};
 
+	public void changePosition(int x, int y) {
+		this.position = nn.new Vec2(x, y);
+	}
+
+	public void shiftPosition(int x, int y) {
+		this.position = this.position.add(nn.new Vec2(x,y));
+	}
+};

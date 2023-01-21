@@ -23,6 +23,8 @@ public class window {
   JFrame frame;
   Panel p;
   InputKey keys;
+	Input mouse;
+	menu menu;
   int width, height;
 	sprite ogre_headshot, elf_headshot;
   player p1, p2;
@@ -34,7 +36,6 @@ public class window {
   ArrayList<text> textQueue = new ArrayList<text>();
   int hex_bg = Integer.valueOf("000000", 16);
   Color bg;
-	menu menu;
 
 	public static enum STATE { Menu, Game };
 	public static STATE state = STATE.Menu;
@@ -47,8 +48,7 @@ public class window {
     this.height = h;
 
 		headshots.add(new sprite("./src/sprites/elf_headshot.bmp", 16, this.height-150, 1, 1, this.nn));
-		headshots.add(new sprite("./src/sprites/ogre_headshot.bmp", this.width-96, this.height-150, 1, 1, this.nn));
-
+		headshots.add(new sprite("./src/sprites/ogre_headshot.bmp", 16, this.height-225, 1, 1, this.nn));
 
     p1 = new elf("./src/sprites/spritesheet_f.bmp", w/2, 0, 4, 4, this.nn);
     // bottom left
@@ -67,7 +67,7 @@ public class window {
     p2 = new ogre("./src/sprites/spritesheet_ogre.bmp", w/2, 0, 4, 4, this.nn);
     p2.shootable = (int) (SHOOT_DELAY*FRAME_SCALING);
     // bottom right
-    p2.criticalTextInit(this.width-100-3*48, this.height-100);
+    //p2.criticalTextInit(this.width-100-3*48, this.height-100);
 		p2.attacks.get(0).loadSound("./src/sounds/fireball.wav");
 		p2.movement = new HashMap<Integer, Integer>() {{
 			put(65, 0);
@@ -77,6 +77,8 @@ public class window {
 			put(84, 4);
 			put(89, 5);
 		}};
+    p2.criticalTextInit(100, this.height-175);
+
 
     players.add(p1);
     players.add(p2);
@@ -87,7 +89,8 @@ public class window {
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.add(p);
     keys = new InputKey();
-		p.addMouseListener(new MouseInput());
+		mouse = new Input(menu.getButtons());
+		p.addMouseListener(mouse);
     p.addKeyListener(keys);
     frame.setVisible(true);
 
@@ -208,7 +211,8 @@ public class window {
     while (true) {
       frame.repaint();
       frame.getContentPane().setBackground(Color.YELLOW);
-      for (player player : players) {
+			for (int i = 0; i < players.size(); i++) {
+				player player = players.get(i);
         if (player.permeate && !player.collide(player.pt, player.pos)) {
           player.permeate = false;
         }
@@ -256,6 +260,7 @@ public class window {
         if (pos.x < -DEATH_RANGE || pos.x > this.width+DEATH_RANGE ||
             pos.y < -DEATH_RANGE || pos.y > this.height+DEATH_RANGE) {
           player.respawn(this.width/2, 0);
+					players.get(1-i).addScore();
         }
         player.shootable++;
       }
@@ -329,7 +334,6 @@ public class window {
 				}
 			} else if (state == STATE.Menu) {
 				menu.render(g);
-				g.dispose();
 			}
     }
   };

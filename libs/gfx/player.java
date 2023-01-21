@@ -15,7 +15,7 @@ abstract public class player extends sprite {
 	HashMap<Integer, Integer> movement;
   final int DOUBLE_JUMP = 15, ULTABLE = 500;
   protected ArrayList<weapon> attacks = new ArrayList<weapon>();
-  public int ddt = 0, shootable = 0, walk_tick = 0;
+  public int ddt = 0, shootable = 0, walk_tick = 0, score = 0;
   // jumps[2] = double jump
   // dash[2] -> dash, direction
   public boolean directions[] = { false, false, false, false }, jumps[] = { true, false, true, false}, dash[] = { false, false };
@@ -35,8 +35,9 @@ abstract public class player extends sprite {
 		this.bounce.setVolume(0.05);
   }
 
+
   public void criticalTextInit(int x, int y) {
-    this.criticalText = new text("0.00%", x, y, "0xFFFFFF", 48);
+    this.criticalText = new text("0.00%  " + String.format("[%d]", this.score), x, y, "0xFFFFFF", 48);
   }
 
   void move(ArrayList<platform> platforms, double FRAME_SCALING) {
@@ -93,11 +94,16 @@ abstract public class player extends sprite {
     this.pos = this.nn.new Vec2(px, py);
     this.vel = this.nn.new Vec2(0, 0);
     this.crit = 0;
-		this.criticalText.updateMsg("0.00%");
+		this.criticalText.updateMsg("0.00%  " + String.format("[%d]", this.score));
     for (weapon w : this.attacks) {
       w.erase();
     }
   }
+
+	public void addScore() {
+		++this.score;
+		this.criticalText.updateMsg("0.00%  " + String.format("[%d]", this.score));
+	}
 
   public platform getSurface(ArrayList<platform> platforms) {
     for (platform p : platforms) {
@@ -167,8 +173,9 @@ abstract public class player extends sprite {
   }
 
   public void updateCritical(bullet b) {
+		int prevState = (int) Math.log10(this.crit);
     this.crit += ((b.getDmg()/b.dmgInfo()[1])*Math.random()*5+5);
-    this.criticalText.updateMsg(String.format("%.2f", this.crit)+"%");
+    this.criticalText.updateMsg(String.format("%.2f", this.crit)+"%  " + String.format("[%d]", this.score));
     boolean critical = Double.compare(Math.random(), (1-this.crit/100)) >= 0;
     double scalar = (critical?Math.random()*2+1:1);
     this.modVel((b.isForward()?1:-1)*b.knockback.x*scalar, b.knockback.y*scalar);
@@ -176,7 +183,7 @@ abstract public class player extends sprite {
 
 	public void updateCritical(double dmg) {
 		this.crit += (Math.random()*(this.crit!=0?this.crit:1)/10)*dmg;
-		this.criticalText.updateMsg(String.format("%.2f", this.crit)+"%");
+		this.criticalText.updateMsg(String.format("%.2f", this.crit)+"%  " + String.format("[%d]", this.score));
 	}
 
 	// check if the second player is within the range, and push him back

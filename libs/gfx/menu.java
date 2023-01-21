@@ -1,66 +1,56 @@
 package libs.gfx;
 
+import libs.gfx.Button;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.awt.Image.*;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import javax.swing.*;
-import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
-import javax.swing.event.MouseInputAdapter;
-import javax.swing.event.MouseInputListener;
+import javax.swing.event.*;
 import javax.imageio.ImageIO;
+import java.util.ArrayList;
+import java.util.Arrays;
 
-public class menu extends JPanel{
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    int h = (int)screenSize.getHeight();
-    int w = (int)screenSize.getWidth();
-    public Rectangle playButton = new Rectangle(w/2 - 50, 350, 100, 50);
-    public Rectangle helpButton = new Rectangle(w/2 - 50, 425, 100, 50);
-    public Rectangle exitButton = new Rectangle(w/2 - 50, 500, 100, 50);
+public class menu extends JPanel {
+	Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+	int height = (int) screenSize.getHeight(), width = (int) screenSize.getWidth();
+	BufferedImage background = null, resized = null;
+	Color color = new Color(0, 79, 207), secondary = new Color(0, 0, 0), highlight = new Color(236, 231, 95);
+	Font button_font = new Font("04b03", Font.BOLD, 50), title_font = new Font("04b03", Font.BOLD, 100);
 
+	String options[] = { "play", "help", "exit" };
 
-    public void render(Graphics g){
-        Graphics2D g2d = (Graphics2D) g;        
-        BufferedImage bground = null;
-        BufferedImage resized = null;
+	// 0: play, 1: help, 2: exit
+	ArrayList<Button> buttons = new ArrayList<Button>(Arrays.asList(new Button(width/2-50, 350, 100, 50, "play"), new Button(width/2-50, 425, 100, 50, "help"), new Button(width/2-50, 500, 100, 50, "exit")));
 
-        try{
-            bground = ImageIO.read(new File("./src/sprites/backgroundfinal.png"));
-            resized = new BufferedImage(w, h, bground.getType());
-            Graphics2D g2 = resized.createGraphics();
-            g2.drawImage(bground, 0, 0,w, h, null);
-            g2.dispose();
-        }catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        Color clr = null;
-        g2d.drawImage(resized, 0, 0, null);
-        Font font = new Font("04b03", Font.BOLD, 100);
-        g.setFont(font);
-        clr = new Color(111, 196, 110);
-        g.setColor(Color.white);
-        g.drawString("balls", w/2 - 120, 170);
-        clr = new Color(2, 112, 0);
-        g.setColor(Color.gray);
-        g.drawString("balls", w/2 - 118, 167);
+	public void render(Graphics g) {
+		Graphics2D g2d = (Graphics2D) g;
+		try {
+			this.background = ImageIO.read(new File("./src/sprites/background.png"));
+			this.resized = new BufferedImage(width,height,background.getType());
+			Graphics2D graphics = resized.createGraphics();
+			graphics.drawImage(this.background, 0, 0, this.width, this.height, null);
+		} catch (IOException ex) { ex.printStackTrace(); }
 
+		g2d.drawImage(this.resized, 0, 0, null);
+		g.setFont(this.title_font);
 
-        Font fnt1 = new Font("04b03", Font.BOLD, 50);
-        clr = new Color(0, 79, 207);
-        g.setFont(fnt1);
-        g.setColor(Color.black);
-        g.drawString("play",playButton.x-2, playButton.y+35+2);
-        g.drawString("help",helpButton.x-2, helpButton.y+35+2);
-        g.drawString("exit",exitButton.x + 4 -2 , exitButton.y+35+2);
-        g.setColor(clr);
-        g.drawString("play",playButton.x, playButton.y+35);
-        g.drawString("help",helpButton.x, helpButton.y+35);
-        g.drawString("exit",exitButton.x + 4, exitButton.y+35);
-        // g2d.draw(playButton);
-        // g2d.draw(helpButton);
-        // g2d.draw(exitButton);
+		g.setColor(this.color);
+		g.drawString("dungeon", width/2-175, 170);
+		g.setColor(this.color);
+		g.drawString("dungeon", width/2-173, 170);
 
-    }
+		g.setFont(this.button_font);
+
+		// Drawing strings
+		for (int i = 0; i < buttons.size(); i++) {
+			Button button = buttons.get(i);
+			g.setColor(button.highlighted?secondary:highlight);
+			g.drawString(options[i], button.x-2, button.y+35+2);
+			g.setColor(color);
+			g.drawString(options[i], button.x, button.y+35);
+		}
+	}
+	public ArrayList<Button> getButtons() {
+		return this.buttons;
+	}
 }

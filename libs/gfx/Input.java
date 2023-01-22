@@ -16,10 +16,10 @@ public class Input implements MouseInputListener {
 	public void mousePressed(MouseEvent e) {}
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		int pos_x = e.getX(), pos_y = e.getY();
+		Point mouse = MouseInfo.getPointerInfo().getLocation(); mouse.y -= 50;
 		for (int i = 0; i < buttons.size(); i++) {
 			Button button = buttons.get(i);
-			boolean clicked = (pos_x >= button.getX() && pos_x <= (button.getX() + button.getWidth()) && pos_y >= button.getY() && pos_y <= (button.getY() + button.getHeight()));
+			boolean clicked = (mouse.x >= button.getX() && mouse.x <= (button.getX() + button.getWidth()) && mouse.y >= button.getY() && mouse.y <= (button.getY() + button.getHeight()));
 			if (clicked) {
 				switch (i) {
 					case (0): window.state = window.STATE.Game; break;

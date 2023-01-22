@@ -11,11 +11,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Menu {
-	Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+	String info = "Dungeon, a game made by Josh Souphanthong and Henry Wang.";
+	String p1 = "Player 1. Melee: T. Fireballs: Y. Movement: W-A-S-D";
+	String p2 = "Player 2. Melee: N. Fireballs: M. Movement: Arrow Keys";
 	int height, width;
 	BufferedImage background = null, resized = null;
 	Color primary = new Color(255, 255, 255), secondary = new Color(0, 0, 0), highlight = new Color(218,112,214);
-	Font button = new Font("04b03", Font.BOLD, 100), title = new Font("04b03", Font.BOLD, 200);
+	Font button = new Font("04b03", Font.BOLD, 100), title = new Font("04b03", Font.BOLD, 200), regular = new Font("04b03", Font.BOLD, 35);
 	ArrayList<Button> buttons;
 	public Menu(int w, int h) {
 		this.width = w;
@@ -47,6 +49,11 @@ public class Menu {
 				g.drawString(button.getTitle(), button.x, button.y+35);
 			}
 		} else if (window.state == window.STATE.Help) {
+			g.setFont(this.regular);
+			g.setColor(this.primary);
+			g.drawString(info, 100, 100);
+			g.drawString(p1, 100, 200);
+			g.drawString(p2, 100, 300);
 		}
 	}
 	public ArrayList<Button> getButtons() {

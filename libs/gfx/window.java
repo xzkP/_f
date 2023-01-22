@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import javax.imageio.ImageIO;
+import java.awt.PointerInfo;
 
 public class window {
 	// constants
@@ -26,7 +27,6 @@ public class window {
 	Input mouse;
 	menu menu;
   int width, height;
-	sprite ogre_headshot, elf_headshot;
   player p1, p2;
   platform ground;
   ArrayList<player> players = new ArrayList<player>();
@@ -34,6 +34,7 @@ public class window {
   ArrayList<platform> platforms = new ArrayList<platform>();
   ArrayList<bouncer> bouncers = new ArrayList<bouncer>();
   ArrayList<text> textQueue = new ArrayList<text>();
+	ArrayList<Button> buttons;
   int hex_bg = Integer.valueOf("000000", 16);
   Color bg;
 
@@ -42,6 +43,7 @@ public class window {
 
   public window(String w_title, int w, int h) {
 		this.menu = new menu();
+		this.buttons = menu.getButtons();
     this.bg = new Color(hex_bg>>16&0xFF, hex_bg>>8&0xFF, hex_bg&0xFF);
 
     this.width = w;
@@ -89,9 +91,9 @@ public class window {
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.add(p);
     keys = new InputKey();
-		mouse = new Input(menu.getButtons());
-		p.addMouseListener(mouse);
-    p.addKeyListener(keys);
+		mouse = new Input(this.buttons);
+		p.addMouseListener(this.mouse);
+    p.addKeyListener(this.keys);
     frame.setVisible(true);
 
     frame.addComponentListener(new ComponentAdapter() {
@@ -333,6 +335,12 @@ public class window {
 					}
 				}
 			} else if (state == STATE.Menu) {
+				Point mouse = MouseInfo.getPointerInfo().getLocation(); mouse.y -= 50;
+				for (int i = 0; i < buttons.size(); i++) {
+					Button button = buttons.get(i);
+					boolean inRange = (mouse.x >= button.getX() && mouse.x <= (button.getX() + button.getWidth()) && mouse.y >= button.getY() && mouse.y <= (button.getY() + button.getHeight()));
+					button.highlighted = inRange;
+				}
 				menu.render(g);
 			}
     }

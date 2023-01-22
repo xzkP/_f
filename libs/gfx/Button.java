@@ -9,4 +9,7 @@ public class Button extends Rectangle {
 		super(x, y, width, height);
 		this.title = t;
 	}
+	public String getTitle() {
+		return this.title;
+	}
 }

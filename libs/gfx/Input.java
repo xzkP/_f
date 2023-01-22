@@ -23,7 +23,7 @@ public class Input implements MouseInputListener {
 			if (clicked) {
 				switch (i) {
 					case (0): window.state = window.STATE.Game; break;
-					case (1): break;
+					case (1): window.state = window.STATE.Help; break;
 					case (2): System.exit(0); break;
 					default: break;
 				}

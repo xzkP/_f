@@ -10,14 +10,17 @@ import javax.imageio.ImageIO;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class menu {
+public class Menu {
 	Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-	int height = (int) screen.getHeight(), width = (int) screen.getWidth();
+	int height, width;
 	BufferedImage background = null, resized = null;
-	Color primary = new Color(0, 79, 207), secondary = new Color(0, 0, 0), highlight = new Color(236, 231, 95);
-	Font button = new Font("04b03", Font.BOLD, 50), title = new Font("04b03", Font.BOLD, 100);
-	ArrayList<Button> buttons = new ArrayList<Button>(Arrays.asList(new Button(width/2-50, 350, 100, 50, "play"), new Button(width/2-50, 425, 100, 50, "help"), new Button(width/2-50, 500, 100, 50, "exit")));
-	public menu() {
+	Color primary = new Color(255, 255, 255), secondary = new Color(0, 0, 0), highlight = new Color(218,112,214);
+	Font button = new Font("04b03", Font.BOLD, 100), title = new Font("04b03", Font.BOLD, 200);
+	ArrayList<Button> buttons;
+	public Menu(int w, int h) {
+		this.width = w;
+		this.height = h;
+		this.buttons = new ArrayList<Button>(Arrays.asList(new Button(width/2-125, 400, 250, 100, "PLAY"), new Button(width/2-125, 500, 250, 100, "HELP"), new Button(width/2-125, 600, 250, 100, "EXIT")));
 		try {
 			this.background = ImageIO.read(new File("./src/sprites/background.png"));
 			this.resized = new BufferedImage(this.width,this.height,this.background.getType());
@@ -27,22 +30,28 @@ public class menu {
 	}
 	public void render(Graphics g) {
 		g.drawImage(this.resized,0,0,null);
-		// drawing title
-		g.setColor(this.primary);
-		g.setFont(this.title);
-		g.drawString("dungeon", width/2-175, 170);
+		if (window.state == window.STATE.Menu) {
+			g.setFont(this.title);
+			// drawing title
+			for (int i = 0; i < 5; i++) {
+				g.setColor(i%2==0?this.secondary:this.highlight);
+				g.drawString("dungeon", width/2-450-(4*i), 170+(4*i));
+			}
 
-		g.setFont(this.button);
-		for (int i = 0; i < buttons.size(); i++) {
-			Button button = buttons.get(i);
-			g.setColor(button.highlighted?this.secondary:this.highlight);
-			g.drawString(button.getTitle(), button.x-2, button.y+35+2);
-			g.setColor(this.primary);
-			g.drawString(button.getTitle(), button.x, button.y+35);
+			g.setFont(this.button);
+			for (int i = 0; i < buttons.size(); i++) {
+				Button button = buttons.get(i);
+				g.setColor(button.highlighted?this.highlight:this.secondary);
+				g.drawString(button.getTitle(), button.x-2, button.y+35+2);
+				g.setColor(this.primary);
+				g.drawString(button.getTitle(), button.x, button.y+35);
+			}
+		} else if (window.state == window.STATE.Help) {
 		}
 	}
 	public ArrayList<Button> getButtons() {
 		return this.buttons;
 	}
 };
+
 

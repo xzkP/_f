@@ -25,7 +25,7 @@ public class window {
   Panel p;
   InputKey keys;
 	Input mouse;
-	menu menu;
+	Menu menu;
   int width, height;
   player p1, p2;
   platform ground;
@@ -38,11 +38,11 @@ public class window {
   int hex_bg = Integer.valueOf("000000", 16);
   Color bg;
 
-	public static enum STATE { Menu, Game };
+	public static enum STATE { Menu, Game, Help };
 	public static STATE state = STATE.Menu;
 
   public window(String w_title, int w, int h) {
-		this.menu = new menu();
+		this.menu = new Menu(w, h);
 		this.buttons = menu.getButtons();
     this.bg = new Color(hex_bg>>16&0xFF, hex_bg>>8&0xFF, hex_bg&0xFF);
 
@@ -334,7 +334,7 @@ public class window {
 						t.renderText(g);
 					}
 				}
-			} else if (state == STATE.Menu) {
+			} else if (state == STATE.Menu || state == STATE.Help) {
 				Point mouse = MouseInfo.getPointerInfo().getLocation(); mouse.y -= 50;
 				for (int i = 0; i < buttons.size(); i++) {
 					Button button = buttons.get(i);
@@ -349,6 +349,9 @@ public class window {
   public class InputKey implements KeyListener {
     public void keyPressed(KeyEvent e) {
 			int key = e.getKeyCode();
+			if (key == 27) {
+				if (state == STATE.Help) state = STATE.Menu;
+			}
 			if (state == STATE.Game) {
 				/* Debugging
 				 char letter = Keyevent.getKeyText(key).charAt(0);
